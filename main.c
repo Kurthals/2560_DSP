@@ -24,8 +24,9 @@ char DFT_ready;
 enum tilstande {reset, run};
 char tilstand = run;
 char angle=0;
+int modulus=0;
 int DFT_counter = 0;
-char angle2 = 0;
+
 
  int main(void){
 	setup();
@@ -38,8 +39,11 @@ char angle2 = 0;
 				if(DFT_ready==1){
 					
 					if(DFT_counter == 30){
+						
+						modulus = sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]);
+						debug_print_char(modulus,1,7);
 						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
-						debug_print_char(angle);
+						debug_print_char(angle,2,7);
 						DFT_counter = 0;
 					}
 					else{
@@ -72,6 +76,7 @@ char angle2 = 0;
 	 InitializeDisplay();
 	 print_fonts();
 	 clear_display();
+	 sendStrXY("AMP",1,0);
 	 sendStrXY("Angle:",2,0);
 	
 	 //init_timer0();
@@ -138,10 +143,10 @@ int intToAscii(int number) {
 	return '0' + number;
 }
 
-void debug_print_char(char input){
+void debug_print_char(char input,char x, char y){
 			char temp[100] = {0};
 		sprintf(temp,"%u",input);
-		sendStrXY(temp, 2,7);
+		sendStrXY(temp, x,y);
 }
 
 
