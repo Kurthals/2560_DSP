@@ -10,6 +10,7 @@ unsigned char timercount = 0;
 unsigned char ADC_start_flag = 0;
 char OLED_buffer[20];
 int ADC_value =0;
+
 char ADC_buffer[4]={0};
 int buffercounter = 0;
 int Amplitude[2] = {0};
@@ -20,25 +21,25 @@ char AmpTrig[NUM_SAMPLES]={0};
 char PhaseTrig[NUM_SAMPLES]={0};
 char trig_count = 0;
 char DFT_ready;
-//enum states {run, stop};
+enum tilstande {reset, run};
+char tilstand = reset; 
 
  int main(void){
 	setup();
 	
-	
-//Main While-loop	
+//Main loop	
 	while(1){
-		if(DFT_ready==1){
-			if(DFT_counter == 1000){
-				
-	 	
-		
-		 
-		 
+		switch(tilstand){
+			
+			case run:
+				if(DFT_ready){
+					angle = atan2(Phase[active_read],Amplitude[active_read]);
+				}
+				break;
+		}
 	 
 	}
  }
- 
  
  
  
@@ -63,6 +64,26 @@ char DFT_ready;
 	 init_timer0();
 		 
  }
+ 
+ 
+ //Set next state in state machine
+ void nextState(char input){
+	 
+	 tilstand = input;
+	 return;
+	 
+	 //if(uart_type==0x01){
+		 //return set_gen;
+	 //}
+	 //if(uart_type==0x02){
+		 //return set_sample;
+	 //}
+	 //if(uart_type==0x03){
+		 //return BodePlot;
+	 //}
+	 //else return scope;
+ }
+ 
  
  //Preload Trigonometric values into buffers:
  void init_trigonomery(){
@@ -102,12 +123,13 @@ char DFT_ready;
 //Service routine for Timer1 Compare B
 ISR(TIMER0_COMPA_vect){
 //	TOGGLEBIT(PORTB,6);
- 	if(timercount!=3){
+ 	if(timercount != 3){
  		timercount++;		
  	}
  	else{
  		timercount = 0;
  		TOGGLEBIT(PORTB,6);	
+		//Start ADC sampling
 		if(CHKBIT(PORTB,6) == 0 && ADC_start_flag == 0){
 			ADC_start_flag = 1;
 			init_adc(1);
@@ -122,14 +144,14 @@ ISR(ADC_vect){
 	ADC_value = ADCH;
 	//formatADCSample(ADC_value,ADC_buffer);
 	//sendStrXY(ADC_buffer,6,0);
-	if(buffercounter<=NUM_SAMPLES-1){
+	if(buffercounter < NUM_SAMPLES){
 		Amplitude[active_write] = Amplitude[active_write]+ADC_value*AmpTrig[buffercounter];
 		Phase[active_write] = Phase[active_write]+ADC_value*PhaseTrig[buffercounter];
 		buffercounter++;
 	}
 	else{
 		Amplitude[active_read] = 0;
-		Phase[active_read] =0;
+		Phase[active_read] = 0;
 		if(active_write == 0){
 			active_write = 1;
 			active_read = 0;

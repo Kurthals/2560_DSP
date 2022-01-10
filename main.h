@@ -28,7 +28,7 @@
 #include "USART.h"
 #include "ADC.h"
 #include "Timer.h"
-
+#include <math.h>
 
 #include "I2C.h"
 #include "ssd1306.h"
@@ -79,6 +79,8 @@
 // Functions
 // ================================================
 void setup();
+void nextState(char input);
+
 /*
 void transmitUARTPackage(char * data, unsigned char type, unsigned int dataSize);
 unsigned int calcCheckSum();
