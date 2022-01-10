@@ -10,6 +10,7 @@ unsigned char timercount = 0;
 unsigned char ADC_start_flag = 0;
 char OLED_buffer[20];
 int ADC_value =0;
+int ADC_value_output=0;
 
 char ADC_buffer[4]={0};
 int buffercounter = 0;
@@ -38,13 +39,16 @@ int DFT_counter = 0;
 			case run:
 				if(DFT_ready==1){
 					
-					if(DFT_counter == 30){
+					if(DFT_counter == 80){
 						
-						modulus = sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]);
+						modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
+						//debug_print_char(Amplitude[active_read],1,7);
 						debug_print_char(modulus,1,7);
 						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
 						debug_print_char(angle,2,7);
 						DFT_counter = 0;
+						debug_print_char(ADC_value_output,3,7);
+						
 					}
 					else{
 						DFT_counter++;
@@ -176,11 +180,12 @@ ISR(TIMER0_COMPA_vect){
 //Service routine for ADC sample ready
 ISR(ADC_vect){
 	ADC_value = ADCH;
-	//formatADCSample(ADC_value,ADC_buffer);
-	//sendStrXY(ADC_buffer,6,0);
+	
 	if(buffercounter < NUM_SAMPLES){
-		Amplitude[active_write] = Amplitude[active_write]+(ADC_value*5/(1024))*AmpTrig[buffercounter];
-		Phase[active_write] = Phase[active_write]+(ADC_value*5/(1024))*PhaseTrig[buffercounter];
+		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
+		Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/1024)*AmpTrig[buffercounter]);
+		Phase[active_write] = Phase[active_write]+(((ADC_value*5)/1024)*PhaseTrig[buffercounter]);
+		ADC_value_output=(ADC_value*5)/1024;
 		buffercounter++;
 	}
 	else{

@@ -21,7 +21,7 @@ void init_adc(char interrupt){
 //Init ADC 8kHz from timer 0 (with interrupt if entered)
 void init_adc(char interrupt){
 	ADCSRA |= (1<<ADPS2);						//1MHz input clock to ADC (div factor 16). NB: Only for resolutions less than 10bit
-	ADMUX  |= (1<<REFS0);						//3,3 V reference with cap at VREF pin.
+//	ADMUX  |= (1<<REFS0);						//3,3 V reference with cap at VREF pin.
 	ADMUX  |= (1<<ADLAR);						//Left adjustment for 8bit resolution
 	DIDR0  |= (1<<ADC0D);						//disabling unused inputs to save power
 	ADCSRB |= (1<<ADTS1) | (1<<ADTS0);			//Auto Trigger source: (Timer/Counter0 Compare Match A)
