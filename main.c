@@ -22,7 +22,10 @@ char PhaseTrig[NUM_SAMPLES]={0};
 char trig_count = 0;
 char DFT_ready;
 enum tilstande {reset, run};
-char tilstand = reset; 
+char tilstand = run;
+char angle=0;
+int DFT_counter = 0;
+char angle2 = 0;
 
  int main(void){
 	setup();
@@ -32,10 +35,20 @@ char tilstand = reset;
 		switch(tilstand){
 			
 			case run:
-				if(DFT_ready){
-					angle = atan2(Phase[active_read],Amplitude[active_read]);
+				if(DFT_ready==1){
+					
+					if(DFT_counter == 30){
+						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
+						debug_print_char(angle);
+						DFT_counter = 0;
+					}
+					else{
+						DFT_counter++;
+					}
+					DFT_ready = 0;
 				}
-				break;
+				
+			break;		
 		}
 	 
 	}
@@ -44,6 +57,7 @@ char tilstand = reset;
  
  
 // Function initializations
+
 
  void setup(){
 	 sei();
@@ -58,10 +72,13 @@ char tilstand = reset;
 	 InitializeDisplay();
 	 print_fonts();
 	 clear_display();
-	 sendStrXY("ADC:",5,0);
+	 sendStrXY("Angle:",2,0);
 	
 	 //init_timer0();
 	 init_timer0();
+	 
+	 //Fill Trigonometric array
+	 init_trigonometry();
 		 
  }
  
@@ -86,7 +103,7 @@ char tilstand = reset;
  
  
  //Preload Trigonometric values into buffers:
- void init_trigonomery(){
+ void init_trigonometry(){
 	 for(int i=0;i<NUM_SAMPLES;i++){
 		 switch(trig_count){
 			 case 0:
@@ -115,6 +132,18 @@ char tilstand = reset;
 		 }
 	 }
  }
+
+//Int to ascii conversion
+int intToAscii(int number) {
+	return '0' + number;
+}
+
+void debug_print_char(char input){
+			char temp[100] = {0};
+		sprintf(temp,"%u",input);
+		sendStrXY(temp, 2,7);
+}
+
 
 
 
@@ -145,8 +174,8 @@ ISR(ADC_vect){
 	//formatADCSample(ADC_value,ADC_buffer);
 	//sendStrXY(ADC_buffer,6,0);
 	if(buffercounter < NUM_SAMPLES){
-		Amplitude[active_write] = Amplitude[active_write]+ADC_value*AmpTrig[buffercounter];
-		Phase[active_write] = Phase[active_write]+ADC_value*PhaseTrig[buffercounter];
+		Amplitude[active_write] = Amplitude[active_write]+(ADC_value*5/(1024))*AmpTrig[buffercounter];
+		Phase[active_write] = Phase[active_write]+(ADC_value*5/(1024))*PhaseTrig[buffercounter];
 		buffercounter++;
 	}
 	else{
@@ -518,13 +547,6 @@ unsigned int calcCheckSum(){
 	return 0x0000; 
 }
 
-void debug_print_char(char input){
-	if(DEVEL){
-		char temp[100] = {0};
-		sprintf(temp,"%u",input);
-		sendStrXY(temp, 0,0);
-	}
-}
 
 void debug_print_int(int input){
 	if(DEVEL){

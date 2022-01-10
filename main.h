@@ -80,7 +80,9 @@
 // ================================================
 void setup();
 void nextState(char input);
-
+void init_trigonometry();
+int intToAscii(int number);
+void debug_print_char(char input);
 /*
 void transmitUARTPackage(char * data, unsigned char type, unsigned int dataSize);
 unsigned int calcCheckSum();
