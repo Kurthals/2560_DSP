@@ -18,20 +18,20 @@ int Amplitude[2] = {0};
 int Phase[2] = {0};
 char active_write = 0;
 char active_read = 1;
-char AmpTrig[NUM_SAMPLES]={0};
-char PhaseTrig[NUM_SAMPLES]={0};
+int AmpTrig[NUM_SAMPLES]={0};
+int PhaseTrig[NUM_SAMPLES]={0};
 char trig_count = 0;
 char DFT_ready;
 enum tilstande {reset, run};
 char tilstand = run;
-int angle=0;
-int modulus=0;
+float angle = 0;
+float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
 char DFTBuffer[NUM_SAMPLES] = {0};
 
-int Re = 0; 
-int Im = 0;
+float Re = 0; 
+float Im = 0;
 
  int main(void){
 	setup();
@@ -69,23 +69,26 @@ int Im = 0;
 							trig_count = 0;
 							break;
 						}
+						
 						Im = -Im;
 						//Re +=(((DFTBuffer[i]*5)/255)*AmpTrig[i]);
 						//
 						//Im += (((DFTBuffer[i]*5)/255)*PhaseTrig[i]);
 					}
 					
-					if(DFT_counter == 50){
-						modulus = sqrt(Im*Im + Re*Re)/NUM_SAMPLES;
+					if(DFT_counter == 10){
+						debug_print_char(Re,5,7);
+						//debug_print_char(Im,4,7);
+						modulus = (modulus*0.9)+(0.1*sqrt(Im*Im + Re*Re));
 						//debug_print_char(Amplitude[active_read],1,7);
 						debug_print_char(modulus,1,7);
 						
-						angle = (180/M_PI)*atan2(Im, Re);
+						angle = (angle*0.9)+(0.1*(180/M_PI)*atan2(Im, Re));
 						debug_print_char(angle,2,7);
 						
 						DFT_counter = 0;
-						formatADCSample(ADC_value,printbuffer);
-						sendStrXY(printbuffer,3,7);
+// 						formatADCSample(ADC_value,printbuffer);
+// 						sendStrXY(printbuffer,3,7);
 					
 						
 						//modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
@@ -143,10 +146,10 @@ int Im = 0;
  
  
  //Set next state in state machine
- void nextState(char input){
-	 
-	 tilstand = input;
-	 return;
+//  void nextState(char input){
+// 	 
+// 	 tilstand = input;
+// 	 return;
 	 
 	 //if(uart_type==0x01){
 		 //return set_gen;
@@ -158,7 +161,7 @@ int Im = 0;
 		 //return BodePlot;
 	 //}
 	 //else return scope;
- }
+ //}
  
  
  //Preload Trigonometric values into buffers:
@@ -222,9 +225,10 @@ int intToAscii(int number) {
 	return '0' + number;
 }
 
-void debug_print_char(int input,char x, char y){
+void debug_print_char(float input,char x, char y){
 	char temp[100] = {0};
-	sprintf(temp,"%d",input);
+	dtostrf(input,4,2,temp);
+	//sprintf(temp,"%d",input);
 	sendStrXY(temp, x,y);
 }
 
