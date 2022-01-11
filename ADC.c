@@ -66,7 +66,7 @@ void startADCSampling(char channel){
 void formatADCSample(int sample, char * buffer){
 	
 	char Vref = 5;		//3,3V * 3 =9,9. Searching for whole number. Divider should be mult. by 3 as well. Side 280 i datablad
-	int div = 256;
+	int div = 255;
 	
 	unsigned int voltage = (Vref*sample/div); 
 	buffer[0]=voltage+0x30;					//ascii for the integer

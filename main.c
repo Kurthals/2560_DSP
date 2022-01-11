@@ -40,17 +40,18 @@ char printbuffer[4]={0};
 			case run:
 				if(DFT_ready==1){
 					
-					if(DFT_counter == 80){
+					if(DFT_counter == 50){
 						
 						modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
 						//debug_print_char(Amplitude[active_read],1,7);
 						debug_print_char(modulus,1,7);
+						
 						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
 						debug_print_char(angle,2,7);
+						
 						DFT_counter = 0;
 						formatADCSample(ADC_value,printbuffer);
 						sendStrXY(printbuffer,3,7);
-						//debug_print_char(ADC_value_output,3,7);
 						
 					}
 					else{
@@ -58,10 +59,8 @@ char printbuffer[4]={0};
 					}
 					DFT_ready = 0;
 				}
-				
 			break;		
 		}
-	 
 	}
  }
  
@@ -151,9 +150,9 @@ int intToAscii(int number) {
 }
 
 void debug_print_char(char input,char x, char y){
-			char temp[100] = {0};
-		sprintf(temp,"%u",input);
-		sendStrXY(temp, x,y);
+	char temp[100] = {0};
+	sprintf(temp,"%u",input);
+	sendStrXY(temp, x,y);
 }
 
 
@@ -186,9 +185,9 @@ ISR(ADC_vect){
 	
 	if(buffercounter < NUM_SAMPLES){
 		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
-		Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/1024)*AmpTrig[buffercounter]);
-		Phase[active_write] = Phase[active_write]+(((ADC_value*5)/1024)*PhaseTrig[buffercounter]);
-		ADC_value_output=(ADC_value*5)/1024;
+		Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/255)*AmpTrig[buffercounter]);
+		Phase[active_write] = Phase[active_write]+(((ADC_value*5)/255)*PhaseTrig[buffercounter]);
+		ADC_value_output = (ADC_value*5)/255;
 		buffercounter++;
 	}
 	else{
@@ -283,7 +282,8 @@ int main(void){
 			OLED_buffer[i]=data[i]+0x30;
 		}		
 		sendStrXY(OLED_buffer,4,5);
-		debug_print(uart_type,5);
+		
+		(uart_type,5);
 		debug_print(rec_complete,6);
 		debug_print(checksum_flag,7);
 		sendStrXY("Data:",4,0);
