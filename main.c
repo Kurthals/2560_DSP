@@ -27,6 +27,7 @@ char tilstand = run;
 char angle=0;
 int modulus=0;
 int DFT_counter = 0;
+char printbuffer[4]={0};
 
 
  int main(void){
@@ -47,7 +48,9 @@ int DFT_counter = 0;
 						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
 						debug_print_char(angle,2,7);
 						DFT_counter = 0;
-						debug_print_char(ADC_value_output,3,7);
+						formatADCSample(ADC_value,printbuffer);
+						sendStrXY(printbuffer,3,7);
+						//debug_print_char(ADC_value_output,3,7);
 						
 					}
 					else{

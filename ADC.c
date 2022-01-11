@@ -65,8 +65,8 @@ void startADCSampling(char channel){
 //Format ADC 10-bit sample to decimal value with 2 decimal places.	
 void formatADCSample(int sample, char * buffer){
 	
-	char Vref = 10;		//3,3V * 3 =9,9. Searching for whole number. Divider should be mult. by 3 as well. Side 280 i datablad
-	int div = 1024*3;
+	char Vref = 5;		//3,3V * 3 =9,9. Searching for whole number. Divider should be mult. by 3 as well. Side 280 i datablad
+	int div = 256;
 	
 	unsigned int voltage = (Vref*sample/div); 
 	buffer[0]=voltage+0x30;					//ascii for the integer
@@ -76,7 +76,7 @@ void formatADCSample(int sample, char * buffer){
 	frac = (Vref*frac)%div;
 	buffer[3]= (Vref*frac)/div +0x30;
 	frac = (Vref*frac)%div;
-	if(frac>=1023)
+	if(frac>=(div-1))
 	buffer[3]++;
 	if(buffer[3]==(0x30+10)) {
 		buffer[3]=0x30;
