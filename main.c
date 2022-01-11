@@ -24,11 +24,14 @@ char trig_count = 0;
 char DFT_ready;
 enum tilstande {reset, run};
 char tilstand = run;
-char angle=0;
+int angle=0;
 int modulus=0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
+char DFTBuffer[NUM_SAMPLES] = {0};
 
+int Re = 0; 
+int Im = 0;
 
  int main(void){
 	setup();
@@ -38,25 +41,70 @@ char printbuffer[4]={0};
 		switch(tilstand){
 			
 			case run:
-				if(DFT_ready==1){
+				if(DFT_ready == 1){
+					
+					for(int i = 0; i<NUM_SAMPLES; i++){
+						switch(trig_count){
+							case 0:
+							Re += ((DFTBuffer[i]*5)/255);
+							Im += 0;
+							trig_count++;
+							break;
+							
+							case 1:
+							Re += 0;
+							Im += ((DFTBuffer[i]*5)/255);
+							trig_count++;
+							break;
+							
+							case 2:
+							Re -= ((DFTBuffer[i]*5)/255);
+							Im += 0;
+							trig_count++;
+							break;
+							
+							case 3:
+							Re += 0;
+							Im -= ((DFTBuffer[i]*5)/255);
+							trig_count = 0;
+							break;
+						}
+						Im = -Im;
+						//Re +=(((DFTBuffer[i]*5)/255)*AmpTrig[i]);
+						//
+						//Im += (((DFTBuffer[i]*5)/255)*PhaseTrig[i]);
+					}
 					
 					if(DFT_counter == 50){
-						
-						modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
+						modulus = sqrt(Im*Im + Re*Re)/NUM_SAMPLES;
 						//debug_print_char(Amplitude[active_read],1,7);
 						debug_print_char(modulus,1,7);
 						
-						angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
+						angle = (180/M_PI)*atan2(Im, Re);
 						debug_print_char(angle,2,7);
 						
 						DFT_counter = 0;
 						formatADCSample(ADC_value,printbuffer);
 						sendStrXY(printbuffer,3,7);
+					
+						
+						//modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
+						////debug_print_char(Amplitude[active_read],1,7);
+						//debug_print_char(modulus,1,7);
+						//
+						//angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
+						//debug_print_char(angle,2,7);
+						//
+						//DFT_counter = 0;
+						//formatADCSample(ADC_value,printbuffer);
+						//sendStrXY(printbuffer,3,7);
 						
 					}
 					else{
 						DFT_counter++;
 					}
+					Re = 0;
+					Im = 0;
 					DFT_ready = 0;
 				}
 			break;		
@@ -116,31 +164,56 @@ char printbuffer[4]={0};
  //Preload Trigonometric values into buffers:
  void init_trigonometry(){
 	 for(int i=0;i<NUM_SAMPLES;i++){
-		 switch(trig_count){
-			 case 0:
-				AmpTrig[i]=1;
-				PhaseTrig[i]=0;
-				trig_count++;
-				break;
-				
+		switch(trig_count){
+			case 0:
+			AmpTrig[i]=1;
+			PhaseTrig[i]=0;
+			trig_count++;
+			break;
+			 		 
 			case 1:
-				AmpTrig[i]=0;
-				PhaseTrig[i]=1;
-				trig_count++;
-				break;
-			
+			AmpTrig[i]=0;
+			PhaseTrig[i]=1;
+			trig_count++;
+			break;
+			 		 
 			case 2:
-				AmpTrig[i]=-1;
-				PhaseTrig[i]=0;
-				trig_count++;
-				break;
-			
+			AmpTrig[i]=-1;
+			PhaseTrig[i]=0;
+			trig_count++;
+			break;
+			 		 
 			case 3:
-				AmpTrig[i]=0;
-				PhaseTrig[i]=-1;
-				trig_count = 0;
-				break;
-		 }
+			AmpTrig[i]=0;
+			PhaseTrig[i]=-1;
+			trig_count = 0;
+			break;
+		}
+		 //switch(trig_count){
+			 //case 0:
+				//AmpTrig[i]=1;
+				//PhaseTrig[i]=0;
+				//trig_count++;
+				//break;
+				//
+			//case 1:
+				//AmpTrig[i]=0;
+				//PhaseTrig[i]=1;
+				//trig_count++;
+				//break;
+			//
+			//case 2:
+				//AmpTrig[i]=-1;
+				//PhaseTrig[i]=0;
+				//trig_count++;
+				//break;
+			//
+			//case 3:
+				//AmpTrig[i]=0;
+				//PhaseTrig[i]=-1;
+				//trig_count = 0;
+				//break;
+		 //}
 	 }
  }
 
@@ -149,9 +222,9 @@ int intToAscii(int number) {
 	return '0' + number;
 }
 
-void debug_print_char(char input,char x, char y){
+void debug_print_char(int input,char x, char y){
 	char temp[100] = {0};
-	sprintf(temp,"%u",input);
+	sprintf(temp,"%d",input);
 	sendStrXY(temp, x,y);
 }
 
@@ -181,26 +254,29 @@ ISR(TIMER0_COMPA_vect){
 
 //Service routine for ADC sample ready
 ISR(ADC_vect){
-	ADC_value = ADCH;
+	//ADC_value = ADCH;
 	
-	if(buffercounter < NUM_SAMPLES){
-		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
-		Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/255)*AmpTrig[buffercounter]);
-		Phase[active_write] = Phase[active_write]+(((ADC_value*5)/255)*PhaseTrig[buffercounter]);
-		ADC_value_output = (ADC_value*5)/255;
+	if(buffercounter < NUM_SAMPLES && !DFT_ready){
+		
+		DFTBuffer[buffercounter] = ADCH;
 		buffercounter++;
-	}
-	else{
-		Amplitude[active_read] = 0;
-		Phase[active_read] = 0;
-		if(active_write == 0){
-			active_write = 1;
-			active_read = 0;
-			}
-		else{
-			active_write = 0;
-			active_read = 1;
-		}
+		
+		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
+		//Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/255)*AmpTrig[buffercounter]);
+		//Phase[active_write] = Phase[active_write]+(((ADC_value*5)/255)*PhaseTrig[buffercounter]);
+		//ADC_value_output = (ADC_value*5)/255;
+		//buffercounter++;
+	}else{
+		//Amplitude[active_read] = 0;
+		//Phase[active_read] = 0;
+		//if(active_write == 0){
+			//active_write = 1;
+			//active_read = 0;
+			//}
+		//else{
+			//active_write = 0;
+			//active_read = 1;
+		//}
 		DFT_ready = 1;
 		buffercounter = 0;
 	}
