@@ -28,8 +28,7 @@ float angle = 0;
 float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
-char DFTBuffer[NUM_SAMPLES] = {0};
-
+char DFTBuffer[64] = {128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0};
 float Re = 0; 
 float Im = 0;
 
@@ -78,13 +77,16 @@ float Im = 0;
 					
 					if(DFT_counter == 10){
 						debug_print_char(Re,5,7);
+						debug_print_char(Im,6,7);
 						//debug_print_char(Im,4,7);
-						modulus = (modulus*0.9)+(0.1*sqrt(Im*Im + Re*Re));
+						modulus = (modulus*0.9)+(0.1*sqrt((Im*Im) + (Re*Re)));
 						//debug_print_char(Amplitude[active_read],1,7);
 						debug_print_char(modulus,1,7);
+						//modulus = 0;
 						
 						angle = (angle*0.9)+(0.1*(180/M_PI)*atan2(Im, Re));
 						debug_print_char(angle,2,7);
+						//angle = 0;
 						
 						DFT_counter = 0;
 // 						formatADCSample(ADC_value,printbuffer);
@@ -258,11 +260,12 @@ ISR(TIMER0_COMPA_vect){
 
 //Service routine for ADC sample ready
 ISR(ADC_vect){
-	//ADC_value = ADCH;
+	ADC_value = ADCH;
 	
 	if(buffercounter < NUM_SAMPLES && !DFT_ready){
 		
-		DFTBuffer[buffercounter] = ADCH;
+		//DFTBuffer[buffercounter] = ADCH;
+		
 		buffercounter++;
 		
 		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
