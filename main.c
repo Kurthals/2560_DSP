@@ -18,11 +18,11 @@ int Amplitude[2] = {0};
 int Phase[2] = {0};
 char active_write = 0;
 char active_read = 1;
-int AmpTrig[NUM_SAMPLES]={0};
-int PhaseTrig[NUM_SAMPLES]={0};
+int ReTrig[NUM_SAMPLES]={0};
+int ImTrig[NUM_SAMPLES]={0};
 char trig_count = 0;
 char DFT_ready;
-enum tilstande {reset, run};
+enum tilstande {reset, run, calibrate, store};
 char tilstand = run;
 float angle = 0;
 float modulus = 0;
@@ -44,20 +44,35 @@ char transmitflag = 0;
 			
 			case run:
 				computeDFT();
-			break;		
+			break;	
+			
+			case calibrate:
+			
+			break; 
+			
+			case store:
+			
+			break;
+			
+			case reset:
+			
+			break; 
+			
+				
 		}
 	}
  }
  
- 
-// Function initializations
 
+
+// ================================================
+// Initialization
+// ================================================
 
  void setup(){
 	 sei();
+	 //Setup ADC PORT
 	 SETBIT(DDRB,6);
-	 SETBIT(DDRB,5);
-	 CLRBIT(PORTB,5);
 	 CLRBIT(PORTB,6);
 		 
 	 //OLED-display
@@ -77,64 +92,82 @@ char transmitflag = 0;
 		 
  }
  
- void computeDFT(){
-	if(DFT_ready == 1){
-		
-		for(int i = 0; i<NUM_SAMPLES; i++){
-			Re += AmpTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
-			Im += PhaseTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
-			Im = -Im;
-		}
-		
-		modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
-		debug_print_char(modulus,1,7);
-		
-		angle = (0.9*angle)+((0.1*(180/M_PI)*atan2(Im, Re)))/16;
-		debug_print_char(angle,2,7);
-		
-		Re = 0;
-		Im = 0;
-		DFT_ready = 0;
-	}
- }
  
- //Set next state in state machine
+  //Set next state in state machine
   void nextState(char input){
- 	 tilstand = input;
- 	 return;
- }
+	  tilstand = input;
+	  return;
+  }
+
  
+
+ 
+ 
+ 
+ // ================================================
+ // DFT
+ // ================================================
  
  //Pre-load Trigonometric values into buffers:
  void init_trigonometry(){
-	 for(int i=0; i<NUM_SAMPLES; i++){
+	 for(int i = 0; i<NUM_SAMPLES; i++){
 		switch(trig_count){
 			case 0:
-			AmpTrig[i]=1;
-			PhaseTrig[i]=0;
+			ReTrig[i]=1;
+			ImTrig[i]=0;
 			trig_count++;
 			break;
 			 		 
 			case 1:
-			AmpTrig[i]=0;
-			PhaseTrig[i]=1;
+			ReTrig[i]=0;
+			ImTrig[i]=1;
 			trig_count++;
 			break;
 			 		 
 			case 2:
-			AmpTrig[i]=-1;
-			PhaseTrig[i]=0;
+			ReTrig[i]=-1;
+			ImTrig[i]=0;
 			trig_count++;
 			break;
 			 		 
 			case 3:
-			AmpTrig[i]=0;
-			PhaseTrig[i]=-1;
+			ReTrig[i]=0;
+			ImTrig[i]=-1;
 			trig_count = 0;
 			break;
 		}
 	 }
  }
+
+
+//Compute DFT for latest sample
+ void computeDFT(){
+	 if(DFT_ready == 1){
+		 
+		 for(int i = 0; i<NUM_SAMPLES; i++){
+			 Re += ReTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
+			 Im += ImTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
+			 Im = -Im;
+		 }
+		 
+		 modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
+		 debug_print_char(modulus,1,7);
+		 
+		 angle = (0.9*angle)+((0.1*(180/M_PI)*atan2(Im, Re)))/16;
+		 debug_print_char(angle,2,7);
+		 
+		 Re = 0;
+		 Im = 0;
+		 DFT_ready = 0;
+	 }
+ }
+
+
+
+
+// ================================================
+// Utils
+// ================================================
 
 //Int to ascii conversion
 int intToAscii(int number) {
@@ -151,7 +184,9 @@ void debug_print_char(float input,char x, char y){
 
 
 
-//Service Routines
+// ================================================
+// Service Routines
+// ================================================
 
 //Service routine for Timer1 Compare B
 ISR(TIMER0_COMPA_vect){
@@ -178,31 +213,36 @@ ISR(ADC_vect){
 	TOGGLEBIT(PORTB,5);
 	
 	if(buffercounter < NUM_SAMPLES && !DFT_ready){
-		
 		DFTBuffer[buffercounter] = ADCH;
-		
 		buffercounter++;
-		
-		//Amplitude[active_write]	= Amplitude[active_write]+((5*AmpTrig[buffercounter]/1024)*ADC_value);
-		//Amplitude[active_write] = Amplitude[active_write]+(((ADC_value*5)/255)*AmpTrig[buffercounter]);
-		//Phase[active_write] = Phase[active_write]+(((ADC_value*5)/255)*PhaseTrig[buffercounter]);
-		//ADC_value_output = (ADC_value*5)/255;
-		//buffercounter++;
 	}else{
-		//Amplitude[active_read] = 0;
-		//Phase[active_read] = 0;
-		//if(active_write == 0){
-			//active_write = 1;
-			//active_read = 0;
-			//}
-		//else{
-			//active_write = 0;
-			//active_read = 1;
-		//}
 		DFT_ready = 1;
 		buffercounter = 0;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	

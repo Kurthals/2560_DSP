@@ -70,10 +70,7 @@
 #define RESET 0x03
 */
 //ADC
-#define ADC_CHANNEL	0
-#define ADC_TRIG_SRC_PS	64
 
-#define SAMPLE_BUF	1100 
 
 
 // ================================================
@@ -82,9 +79,10 @@
 void setup();
 void nextState(char input);
 void init_trigonometry();
+void computeDFT();
 int intToAscii(int number);
 void debug_print_char(float input, char x, char y);
-void computeDFT();
+
 
 
 
