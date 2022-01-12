@@ -42,7 +42,7 @@
 #define TOGGLEBIT(ADDR,BIT)(ADDR ^= (1<<BIT))
 
 #define NUM_SAMPLES 64
-#define BIT_DIV 255
+#define BIT_DIV 256
 
 #define HEADER_SIZE	5
 #define FOOTER_SIZE 2
