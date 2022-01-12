@@ -14,8 +14,6 @@ int ADC_value_output=0;
 
 char ADC_buffer[4]={0};
 int buffercounter = 0;
-int Amplitude[2] = {0};
-int Phase[2] = {0};
 char active_write = 0;
 char active_read = 1;
 int ReTrig[NUM_SAMPLES]={0};
@@ -33,6 +31,15 @@ float Re = 0;
 float Im = 0;
 double sqrtval=0;
 char transmitflag = 0;
+//
+//char jern[NUM_MATERIAL_SAMPLES] = {0xFF};
+//char kobber[NUM_MATERIAL_SAMPLES] = {0xFF};
+//char messing[NUM_MATERIAL_SAMPLES] = {0xFF};
+//char aluminium[NUM_MATERIAL_SAMPLES] = {0xFF};
+
+
+//0:jern, 1:kobber, 2:messing, 3:aluminium
+float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {0xFF};
 
 
  int main(void){
@@ -57,8 +64,6 @@ char transmitflag = 0;
 			case reset:
 			
 			break; 
-			
-				
 		}
 	}
  }
@@ -161,6 +166,37 @@ char transmitflag = 0;
 		 DFT_ready = 0;
 	 }
  }
+
+
+// ================================================
+// Main functionality
+// ================================================
+char detectMaterial(){
+	
+	//Check if signal amplitude is above threshold
+	if(modulus>AMP_THRESHOLD){
+		//Detect material from phase
+		char result[2] = {0};
+		char hits = 0;
+		for(int i = 0; i<NUM_MATERIALS; i++){
+			hits = 0;
+			for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
+				if(materials[i][j] < (angle+MATERIAL_DIVIATION) && materials[i][j] > (angle-MATERIAL_DIVIATION)){
+					hits ++; 
+				}
+				if(hits>result[0]){
+					 result[0]=hits;
+					 result[1]=i;	//Save material with most hits
+				}
+			}
+		}
+		//Return material with most matched phase "hits"
+		return result[1];
+	}
+	return 0xFF;
+}
+
+
 
 
 
