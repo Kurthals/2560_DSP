@@ -43,62 +43,11 @@ char transmitflag = 0;
 		switch(tilstand){
 			
 			case run:
-				if(DFT_ready == 1){
-					
-					for(int i = 0; i<NUM_SAMPLES; i++){
-						switch(trig_count){
-							case 0:
-							Re += (DFTBuffer[i]*5)/BIT_DIV;
-							Im += 0;
-							trig_count++;
-							break;
-							
-							case 1:
-							Re += 0;
-							Im +=  (DFTBuffer[i]*5)/BIT_DIV;
-							trig_count++;
-							break;
-							
-							case 2:
-							Re -=  (DFTBuffer[i]*5)/BIT_DIV;
-							Im += 0;
-							trig_count++;
-							break;
-							
-							case 3:
-							Re += 0;
-							Im -=  (DFTBuffer[i]*5)/BIT_DIV;
-							trig_count = 0;
-							break;
-						}
-						
-						Im = -Im;
-
-					}
-					
-					if(DFT_counter == 1){
-						modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
-						debug_print_char(modulus,1,7);
-						
-						angle = (0.9*angle)+(0.1*(180/M_PI)*atan2(Im, Re));
-						debug_print_char(angle,2,7);
-						
-						
-						DFT_counter = 0;
-						
-					}
-					else{
-						DFT_counter++;
-					}
-					Re = 0;
-					Im = 0;
-					DFT_ready = 0;
-				}
+				computeDFT();
 			break;		
 		}
 	}
  }
- 
  
  
 // Function initializations
@@ -128,29 +77,37 @@ char transmitflag = 0;
 		 
  }
  
+ void computeDFT(){
+	if(DFT_ready == 1){
+		
+		for(int i = 0; i<NUM_SAMPLES; i++){
+			Re += AmpTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
+			Im += PhaseTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
+			Im = -Im;
+		}
+		
+		modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
+		debug_print_char(modulus,1,7);
+		
+		angle = (0.9*angle)+((0.1*(180/M_PI)*atan2(Im, Re)))/16;
+		debug_print_char(angle,2,7);
+		
+		Re = 0;
+		Im = 0;
+		DFT_ready = 0;
+	}
+ }
  
  //Set next state in state machine
-//  void nextState(char input){
-// 	 
-// 	 tilstand = input;
-// 	 return;
-	 
-	 //if(uart_type==0x01){
-		 //return set_gen;
-	 //}
-	 //if(uart_type==0x02){
-		 //return set_sample;
-	 //}
-	 //if(uart_type==0x03){
-		 //return BodePlot;
-	 //}
-	 //else return scope;
- //}
+  void nextState(char input){
+ 	 tilstand = input;
+ 	 return;
+ }
  
  
- //Preload Trigonometric values into buffers:
+ //Pre-load Trigonometric values into buffers:
  void init_trigonometry(){
-	 for(int i=0;i<NUM_SAMPLES;i++){
+	 for(int i=0; i<NUM_SAMPLES; i++){
 		switch(trig_count){
 			case 0:
 			AmpTrig[i]=1;
@@ -176,31 +133,6 @@ char transmitflag = 0;
 			trig_count = 0;
 			break;
 		}
-		 //switch(trig_count){
-			 //case 0:
-				//AmpTrig[i]=1;
-				//PhaseTrig[i]=0;
-				//trig_count++;
-				//break;
-				//
-			//case 1:
-				//AmpTrig[i]=0;
-				//PhaseTrig[i]=1;
-				//trig_count++;
-				//break;
-			//
-			//case 2:
-				//AmpTrig[i]=-1;
-				//PhaseTrig[i]=0;
-				//trig_count++;
-				//break;
-			//
-			//case 3:
-				//AmpTrig[i]=0;
-				//PhaseTrig[i]=-1;
-				//trig_count = 0;
-				//break;
-		 //}
 	 }
  }
 

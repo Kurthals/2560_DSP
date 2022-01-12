@@ -84,6 +84,14 @@ void nextState(char input);
 void init_trigonometry();
 int intToAscii(int number);
 void debug_print_char(float input, char x, char y);
+void computeDFT();
+
+
+
+
+
+
+
 /*
 void transmitUARTPackage(char * data, unsigned char type, unsigned int dataSize);
 unsigned int calcCheckSum();
