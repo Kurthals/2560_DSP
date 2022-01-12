@@ -28,9 +28,10 @@ float angle = 0;
 float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
-char DFTBuffer[64] = {128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0};
-float Re = 0; 
+char DFTBuffer[64] = {0};// {0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
+double Re = 0; 
 float Im = 0;
+double sqrtval=0;
 
  int main(void){
 	setup();
@@ -70,39 +71,20 @@ float Im = 0;
 						}
 						
 						Im = -Im;
-						//Re +=(((DFTBuffer[i]*5)/255)*AmpTrig[i]);
-						//
-						//Im += (((DFTBuffer[i]*5)/255)*PhaseTrig[i]);
+
 					}
 					
-					if(DFT_counter == 10){
-						debug_print_char(Re,5,7);
-						debug_print_char(Im,6,7);
-						//debug_print_char(Im,4,7);
-						modulus = (modulus*0.9)+(0.1*sqrt((Im*Im) + (Re*Re)));
-						//debug_print_char(Amplitude[active_read],1,7);
+					if(DFT_counter == 1){
+
+						modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
 						debug_print_char(modulus,1,7);
-						//modulus = 0;
 						
-						angle = (angle*0.9)+(0.1*(180/M_PI)*atan2(Im, Re));
+						
+						angle = (0.9*angle)+(0.1*(180/M_PI)*atan2(Im, Re));
 						debug_print_char(angle,2,7);
-						//angle = 0;
+						
 						
 						DFT_counter = 0;
-// 						formatADCSample(ADC_value,printbuffer);
-// 						sendStrXY(printbuffer,3,7);
-					
-						
-						//modulus = (modulus*0.9)+(0.1*sqrt(Phase[active_read]*Phase[active_read]+Amplitude[active_read]*Amplitude[active_read]));
-						////debug_print_char(Amplitude[active_read],1,7);
-						//debug_print_char(modulus,1,7);
-						//
-						//angle = (180/M_PI)*atan2(Phase[active_read],Amplitude[active_read]);
-						//debug_print_char(angle,2,7);
-						//
-						//DFT_counter = 0;
-						//formatADCSample(ADC_value,printbuffer);
-						//sendStrXY(printbuffer,3,7);
 						
 					}
 					else{
@@ -264,7 +246,7 @@ ISR(ADC_vect){
 	
 	if(buffercounter < NUM_SAMPLES && !DFT_ready){
 		
-		//DFTBuffer[buffercounter] = ADCH;
+		DFTBuffer[buffercounter] = ADCH;
 		
 		buffercounter++;
 		
