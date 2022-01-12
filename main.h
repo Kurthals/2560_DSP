@@ -44,11 +44,13 @@
 #define NUM_SAMPLES 64
 #define BIT_DIV 256
 
-#define HEADER_SIZE	5
-#define FOOTER_SIZE 2
-#define PADDING_SIZE	HEADER_SIZE+FOOTER_SIZE
-#define OUTPUT_BUF_UART	1008
-#define DATA_BUF	1008  
+
+#define AMP_THRESHOLD 1
+#define NUM_MATERIALS 4
+#define NUM_MATERIAL_SAMPLES 20
+#define MATERIAL_DIVIATION 2	//deviation from material phase in degrees
+
+
 /*
 //Telemetry types
 #define BTN_TYPE	0x01
@@ -80,6 +82,8 @@ void setup();
 void nextState(char input);
 void init_trigonometry();
 void computeDFT();
+char detectMaterial();
+
 int intToAscii(int number);
 void debug_print_char(float input, char x, char y);
 

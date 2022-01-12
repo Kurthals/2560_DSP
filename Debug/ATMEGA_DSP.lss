@@ -13,6 +13,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000017e8  2**2
                   CONTENTS, READONLY
+<<<<<<< HEAD
   5 .debug_aranges 00000220  00000000  00000000  00001828  2**0
                   CONTENTS, READONLY, DEBUGGING
   6 .debug_info   00002792  00000000  00000000  00001a48  2**0
@@ -28,6 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
  11 .debug_loc    000014b3  00000000  00000000  000077b6  2**0
                   CONTENTS, READONLY, DEBUGGING
  12 .debug_ranges 00000248  00000000  00000000  00008c69  2**0
+=======
+  5 .debug_aranges 00000228  00000000  00000000  00001860  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   00002806  00000000  00000000  00001a88  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 000011a9  00000000  00000000  0000428e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   000013dd  00000000  00000000  00005437  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000644  00000000  00000000  00006814  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    00000b38  00000000  00000000  00006e58  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00001629  00000000  00000000  00007990  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000268  00000000  00000000  00008fb9  2**0
+>>>>>>> Artificial_DFT
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -973,6 +991,7 @@ void debug_print_char(float input,char x, char y){
      9da:	10 92 65 03 	sts	0x0365, r1	; 0x800365 <DFT_ready>
 	 }
  }
+<<<<<<< HEAD
      9de:	df 91       	pop	r29
      9e0:	cf 91       	pop	r28
      9e2:	1f 91       	pop	r17
@@ -990,6 +1009,25 @@ void debug_print_char(float input,char x, char y){
 000009f8 <main>:
 double sqrtval=0;
 char transmitflag = 0;
+=======
+     9ca:	df 91       	pop	r29
+     9cc:	cf 91       	pop	r28
+     9ce:	1f 91       	pop	r17
+     9d0:	0f 91       	pop	r16
+     9d2:	ff 90       	pop	r15
+     9d4:	ef 90       	pop	r14
+     9d6:	df 90       	pop	r13
+     9d8:	cf 90       	pop	r12
+     9da:	bf 90       	pop	r11
+     9dc:	af 90       	pop	r10
+     9de:	9f 90       	pop	r9
+     9e0:	8f 90       	pop	r8
+     9e2:	08 95       	ret
+
+000009e4 <main>:
+//0:jern, 1:kobber, 2:messing, 3:aluminium
+float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {0xFF};
+>>>>>>> Artificial_DFT
 
 
  int main(void){
