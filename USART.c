@@ -54,11 +54,11 @@ void putCharUSART(char tx){
 	UDR1 = tx;
 }
 
-//void putCharUSART(char tx){
-	//
-	//while(!(UCSR0A & (1<<UDRE0))); //continues when transmit buffer is empty
-	//UDR0 = tx;
-//}
+// void putCharUSART(char tx){
+// 	
+// 	while(!(UCSR0A & (1<<UDRE0))); //continues when transmit buffer is empty
+// 	UDR0 = tx;
+// }
 
 
 

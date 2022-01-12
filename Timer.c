@@ -25,7 +25,7 @@ void init_timer0(){
 	TCCR0A |= (1<<COM0A0) | (1<<WGM01); //Toggle OC0A CTC-mode
 	TCCR0B |= (1<<CS01);				//Prescaler 8
 	TCNT0 = 0;							//Count from 0
-	OCR0A = 124;						//Compare value
+	OCR0A = 249;						//Compare value
 	TIMSK0 |= (1<<OCIE0A);				//Interrupt when TCNT1 = OCR0A
 }
 

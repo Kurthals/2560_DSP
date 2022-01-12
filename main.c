@@ -28,10 +28,12 @@ float angle = 0;
 float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
-char DFTBuffer[64] = {0};// {0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
-double Re = 0; 
+char DFTBuffer[64] = {0}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
+float Re = 0; 
 float Im = 0;
 double sqrtval=0;
+char transmitflag = 0;
+
 
  int main(void){
 	setup();
@@ -46,26 +48,26 @@ double sqrtval=0;
 					for(int i = 0; i<NUM_SAMPLES; i++){
 						switch(trig_count){
 							case 0:
-							Re += ((DFTBuffer[i]*5)/255);
+							Re += (DFTBuffer[i]*5)/BIT_DIV;
 							Im += 0;
 							trig_count++;
 							break;
 							
 							case 1:
 							Re += 0;
-							Im += ((DFTBuffer[i]*5)/255);
+							Im +=  (DFTBuffer[i]*5)/BIT_DIV;
 							trig_count++;
 							break;
 							
 							case 2:
-							Re -= ((DFTBuffer[i]*5)/255);
+							Re -=  (DFTBuffer[i]*5)/BIT_DIV;
 							Im += 0;
 							trig_count++;
 							break;
 							
 							case 3:
 							Re += 0;
-							Im -= ((DFTBuffer[i]*5)/255);
+							Im -=  (DFTBuffer[i]*5)/BIT_DIV;
 							trig_count = 0;
 							break;
 						}
@@ -75,10 +77,8 @@ double sqrtval=0;
 					}
 					
 					if(DFT_counter == 1){
-
 						modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
 						debug_print_char(modulus,1,7);
-						
 						
 						angle = (0.9*angle)+(0.1*(180/M_PI)*atan2(Im, Re));
 						debug_print_char(angle,2,7);
@@ -223,8 +223,8 @@ void debug_print_char(float input,char x, char y){
 
 //Service routine for Timer1 Compare B
 ISR(TIMER0_COMPA_vect){
-//	TOGGLEBIT(PORTB,6);
- 	if(timercount != 3){
+//	TOGGLEBIT(PORTB,5);
+ 	if(timercount != 1){
  		timercount++;		
  	}
  	else{
@@ -243,6 +243,7 @@ ISR(TIMER0_COMPA_vect){
 //Service routine for ADC sample ready
 ISR(ADC_vect){
 	ADC_value = ADCH;
+	TOGGLEBIT(PORTB,5);
 	
 	if(buffercounter < NUM_SAMPLES && !DFT_ready){
 		
@@ -270,6 +271,8 @@ ISR(ADC_vect){
 		buffercounter = 0;
 	}
 }
+
+
 	
 
 /*
