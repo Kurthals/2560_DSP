@@ -33,6 +33,7 @@ float Re = 0;
 float Im = 0;
 double sqrtval=0;
 char transmitflag = 0;
+volatile char BTN5_flag, BTN4_flag, BTN3_flag;
 
 
  int main(void){
@@ -44,14 +45,17 @@ char transmitflag = 0;
 			
 			case run:
 				computeDFT();
+				
+				
 			break;	
 			
 			case calibrate:
 			
+			
 			break; 
 			
 			case store:
-			
+				
 			break;
 			
 			case reset:
@@ -70,11 +74,28 @@ char transmitflag = 0;
 // ================================================
 
  void setup(){
-	 sei();
+	 
 	 //Setup ADC PORT
 	 SETBIT(DDRB,6);
 	 CLRBIT(PORTB,6);
-		 
+	 
+	 //Setup PINS for buttons
+	 CLRBIT(DDRE,5); //PE5 int5 pin3
+	 CLRBIT(DDRE,4); //PE4 int4 pin2
+	 CLRBIT(DDRD,3); //PD3 int3 pin18
+	 SETBIT(PORTE,5);
+	 SETBIT(PORTE,4);
+	 SETBIT(PORTD,3);
+	 
+	 //Configure Rising edge detection on pins:
+	 EICRA |= (1<<ISC31) | (1<<ISC30);
+	 EICRB |= (1<<ISC41) | (1<<ISC40) | (1<<ISC51) | (1<<ISC50);	
+	 
+	 //Enable interrupts with EIMSK:
+	 EIMSK |= (1<<INT5) | (1<<INT4) | (1<<INT3);
+	 
+	 //Enable global interrupt
+	 sei();
 	 //OLED-display
 	 _i2c_address = 0X78;
 	 I2C_Init();
@@ -221,6 +242,19 @@ ISR(ADC_vect){
 	}
 }
 
+
+//Service routines for external interrupts (buttons)
+ISR(INT3_vect){
+	BTN3_flag = 1;
+}
+
+ISR(INT4_vect){
+	BTN4_flag = 1;
+}
+
+ISR(INT5_vect){
+	BTN5_flag = 1;
+}
 
 
 
