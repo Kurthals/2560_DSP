@@ -22,18 +22,20 @@ char trig_count = 0;
 char DFT_ready;
 enum tilstande {reset, run, calibrate, store};
 char tilstand = run;
-float angle = 0;
+double angle = 0;
 float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
 char DFTBuffer[64] = {0}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
 float Re = 0; 
 float Im = 0;
-double sqrtval=0;
 char transmitflag = 0;
-<<<<<<< HEAD
 volatile char BTN5_flag, BTN4_flag, BTN3_flag;
-=======
+char anglecounter = 0;
+double anglebuf[AVERAGE_NUM]= {0};
+char anglebufcnt = 0;
+double anglemean = 0;
+
 //
 //char jern[NUM_MATERIAL_SAMPLES] = {0xFF};
 //char kobber[NUM_MATERIAL_SAMPLES] = {0xFF};
@@ -42,8 +44,11 @@ volatile char BTN5_flag, BTN4_flag, BTN3_flag;
 
 
 //0:jern, 1:kobber, 2:messing, 3:aluminium
-float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {0xFF};
->>>>>>> Artificial_DFT
+float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
+	{0xFF},
+	{0xFF}
+	};
+
 
 
  int main(void){
@@ -56,6 +61,22 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {0xFF};
 			case run:
 				computeDFT();
 				
+				debug_print_char(atan2(-23,40)*(180/M_PI),5,0);
+// 				if(BTN3_flag == 1){
+// 					_delay_ms(20);
+// 					nextState(calibrate);
+// 					BTN3_flag = 0;
+// 				}
+// 				if(BTN4_flag ==1){
+// 					_delay_ms(20);
+// 					nextState(store);
+// 					BTN4_flag = 0;
+// 				}
+// 				if(BTN5_flag == 1){
+// 					_delay_ms(20);
+// 					nextState(reset);
+// 					BTN5_flag =0;
+// 				}
 				
 			break;	
 			
@@ -176,15 +197,37 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {0xFF};
 		 for(int i = 0; i<NUM_SAMPLES; i++){
 			 Re += ReTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
 			 Im += ImTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
-			 Im = -Im;
+			 //Im = -Im;
+		 }
+		 //Im = -Im;
+		 modulus =(0.9*modulus)+(0.1*sqrtf((Im*Im) + (Re*Re))/16);
+		 debug_print_char(modulus,1,7);
+		
+		 if(Im == 0 && Re == 0){
+			 angle = 0;
+		 }
+		 else{
+			 angle = (0.9*angle)+((0.1*(180/M_PI)*atan2((double)Im, (double)Re)));
+		//	 angle = (180/M_PI)*atan2((double)Im, (double)Re);
 		 }
 		 
-		 modulus =(0.9*modulus)+(0.1*sqrt((Im*Im) + (Re*Re))/16);
-		 debug_print_char(modulus,1,7);
+		 anglebuf[anglebufcnt]=angle;
+		 anglebufcnt++;
 		 
-		 angle = (0.9*angle)+((0.1*(180/M_PI)*atan2(Im, Re)))/16;
-		 debug_print_char(angle,2,7);
-		 
+		 for(int i = 0; i<AVERAGE_NUM; i++){
+			 anglemean += anglebuf[i];
+			 
+		 }
+		 anglemean = anglemean/AVERAGE_NUM;
+		 if(anglebufcnt == AVERAGE_NUM){
+			 anglebufcnt = 0;
+		 }
+// 		 anglecounter ++;
+// 		 if(anglecounter == 10){
+// 		 debug_print_char(anglemean,2,7);
+// 		 anglecounter = 0;
+// 		 }
+		 debug_print_char(anglemean,2,7);
 		 Re = 0;
 		 Im = 0;
 		 DFT_ready = 0;
