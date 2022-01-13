@@ -59,9 +59,8 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 		switch(tilstand){
 			
 			case run:
-				computeDFT();
 				
-				debug_print_char(atan2(-23,40)*(180/M_PI),5,0);
+				computeDFT();
 // 				if(BTN3_flag == 1){
 // 					_delay_ms(20);
 // 					nextState(calibrate);
@@ -199,7 +198,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			 Im += ImTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
 			 //Im = -Im;
 		 }
-		 //Im = -Im;
+		 Im = -Im;
 		 modulus =(0.9*modulus)+(0.1*sqrtf((Im*Im) + (Re*Re))/16);
 		 debug_print_char(modulus,1,7);
 		
@@ -207,7 +206,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			 angle = 0;
 		 }
 		 else{
-			 angle = (0.9*angle)+((0.1*(180/M_PI)*atan2((double)Im, (double)Re)));
+		     angle = (0.9*angle)+((0.1*(180/M_PI)*atan2((double)Im, (double)Re)));
 		//	 angle = (180/M_PI)*atan2((double)Im, (double)Re);
 		 }
 		 
@@ -230,6 +229,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 		 debug_print_char(anglemean,2,7);
 		 Re = 0;
 		 Im = 0;
+		 anglemean = 0;
 		 DFT_ready = 0;
 	 }
  }
