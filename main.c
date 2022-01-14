@@ -11,22 +11,20 @@ unsigned char ADC_start_flag = 0;
 char OLED_buffer[20];
 int ADC_value =0;
 int ADC_value_output=0;
-
-char ADC_buffer[4]={0};
 int buffercounter = 0;
-char active_write = 0;
+volatile char active_write = 0;
 char active_read = 1;
 int ReTrig[NUM_SAMPLES]={0};
 int ImTrig[NUM_SAMPLES]={0};
 char trig_count = 0;
-char DFT_ready;
+char DFT_ready = 0; //Måske nødvendigt med Volatile
 enum tilstande {reset, run, calibrate, store};
 char tilstand = run;
 double angle = 0;
 float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
-char DFTBuffer[64] = {0}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
+char DFTBuffer[2][64] = {{0},{0}}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
 float Re = 0; 
 float Im = 0;
 char transmitflag = 0;
@@ -59,8 +57,9 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 		switch(tilstand){
 			
 			case run:
-				
+				//sendStrXY("Running",1,7);
 				computeDFT();
+				
 // 				if(BTN3_flag == 1){
 // 					_delay_ms(20);
 // 					nextState(calibrate);
@@ -80,11 +79,13 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			break;	
 			
 			case calibrate:
+				sendStrXY("Calibrate",1,7);
 			
 			
 			break; 
 			
 			case store:
+				sendStrXY("Store",1,7);
 				
 			break;
 			
@@ -130,8 +131,10 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 InitializeDisplay();
 	 print_fonts();
 	 clear_display();
-	 sendStrXY("AMP",1,0);
-	 sendStrXY("Angle:",2,0);
+	 sendStrXY("AMP",2,0);
+	 sendStrXY("Angle:",3,0);
+	 sendStrXY("Mode:",1,0);
+	 sendStrXY("Material:",5,0);
 	
 	 //init_timer0();
 	 init_timer0();
@@ -194,22 +197,22 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 if(DFT_ready == 1){
 		 
 		 for(int i = 0; i<NUM_SAMPLES; i++){
-			 Re += ReTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
-			 Im += ImTrig[i]*(DFTBuffer[i]*5)/BIT_DIV;
+			 Re += ReTrig[i]*(DFTBuffer[!active_write][i]*5)/BIT_DIV;
+			 Im += ImTrig[i]*(DFTBuffer[!active_write][i]*5)/BIT_DIV;
 			 //Im = -Im;
 		 }
 		 Im = -Im;
 		 modulus =(0.9*modulus)+(0.1*sqrtf((Im*Im) + (Re*Re))/16);
-		 debug_print_char(modulus,1,7);
+		 debug_print_char(modulus,2,7);
 		
 		 if(Im == 0 && Re == 0){
 			 angle = 0;
 		 }
 		 else{
 		     angle = (0.9*angle)+((0.1*(180/M_PI)*atan2((double)Im, (double)Re)));
-		//	 angle = (180/M_PI)*atan2((double)Im, (double)Re);
 		 }
 		 
+		 // Averaging with AVERAGE_NUM-number of calculated angles.
 		 anglebuf[anglebufcnt]=angle;
 		 anglebufcnt++;
 		 
@@ -217,16 +220,13 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			 anglemean += anglebuf[i];
 			 
 		 }
-		 anglemean = anglemean/AVERAGE_NUM;
+		 anglemean = anglemean/AVERAGE_NUM; //Eller divider med Average_num
 		 if(anglebufcnt == AVERAGE_NUM){
 			 anglebufcnt = 0;
 		 }
-// 		 anglecounter ++;
-// 		 if(anglecounter == 10){
-// 		 debug_print_char(anglemean,2,7);
-// 		 anglecounter = 0;
-// 		 }
-		 debug_print_char(anglemean,2,7);
+		 
+		 
+		 debug_print_char(anglemean,3,7);
 		 Re = 0;
 		 Im = 0;
 		 anglemean = 0;
@@ -312,15 +312,22 @@ ISR(TIMER0_COMPA_vect){
 
 //Service routine for ADC sample ready
 ISR(ADC_vect){
-	ADC_value = ADCH;
-	TOGGLEBIT(PORTB,5);
-	
-	if(buffercounter < NUM_SAMPLES && !DFT_ready){
-		DFTBuffer[buffercounter] = ADCH;
+	if(buffercounter < NUM_SAMPLES){
+		DFTBuffer[active_write][buffercounter] = ADCH;
 		buffercounter++;
-	}else{
+	}
+//	if(buffercounter < NUM_SAMPLES && !DFT_ready){		
+//		DFTBuffer[buffercounter] = ADCH;
+//		buffercounter++;
+//}
+	else if(DFT_ready){
+		buffercounter = 0;
+	}
+	else{
+		active_write = !active_write;
 		DFT_ready = 1;
 		buffercounter = 0;
+		DFTBuffer[active_write][buffercounter] = ADCH;	//Save remaining first sample 
 	}
 }
 
