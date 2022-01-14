@@ -51,29 +51,6 @@
 #define MATERIAL_DEVIATION 2	//deviation from material phase in degrees
 #define AVERAGE_NUM 10
 
-/*
-//Telemetry types
-#define BTN_TYPE	0x01
-#define SEND_TYPE	0x02
-#define START_TYPE	0x03
-
-//SPI data
-#define RESET_SPI 0x01
-
-//Telecommand types
-#define GENERATOR_TYPE	0x01
-#define SCOPE_TYPE	0x02
-#define BODE_TYPE	0x03
-
-//BTN Type-values
-#define ENTER 0X00
-#define SELECT 0x01
-#define START_STOP 0x02
-#define RESET 0x03
-*/
-//ADC
-
-
 
 // ================================================
 // Functions
@@ -94,17 +71,5 @@ void debug_print_char(float input, char x, char y);
 
 
 
-/*
-void transmitUARTPackage(char * data, unsigned char type, unsigned int dataSize);
-unsigned int calcCheckSum();
-void setSampleRate(unsigned int sampleRate);
-//void swapBuffer();
-void readBuffer();
-void debug_print_char(char input);
-void debug_print_int(int input);
-enum tilstande handle_type(char input);
-void debug_print(char input, int value);
-void handle_generator();
-void evaluate_recieve();
-*/
+
 #endif /* MAIN_H_ */
