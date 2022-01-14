@@ -59,6 +59,10 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			case run:
 				sendStrXY("Running  ",1,7);
 				computeDFT();
+				if(detectPhase()==3){
+					 sendStrXY("Alu",6,0);
+				}
+				
 				
 				if(BTN3_flag == 1){
  					nextState(calibrate);
@@ -142,6 +146,8 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 
 	 //Fill Trigonometric array
 	 init_trigonometry();
+	 
+	 loadMaterials();
 		 
  }
  
@@ -242,7 +248,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 // ================================================
 // Main functionality
 // ================================================
-char detectMaterial(){
+char detectPhase(){
 	
 	//Check if signal amplitude is above threshold
 	if(modulus>AMP_THRESHOLD){
@@ -268,7 +274,11 @@ char detectMaterial(){
 }
 
 
-
+void loadMaterials(){
+	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
+		materials[3][i] = 116; 
+	}
+}
 
 
 
