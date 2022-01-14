@@ -48,7 +48,7 @@
 #define AMP_THRESHOLD 1
 #define NUM_MATERIALS 4
 #define NUM_MATERIAL_SAMPLES 20
-#define MATERIAL_DIVIATION 2	//deviation from material phase in degrees
+#define MATERIAL_DEVIATION 2	//deviation from material phase in degrees
 #define AVERAGE_NUM 10
 
 /*

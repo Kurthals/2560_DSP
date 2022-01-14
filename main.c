@@ -9,15 +9,16 @@
 unsigned char timercount = 0;
 unsigned char ADC_start_flag = 0;
 char OLED_buffer[20];
-int ADC_value =0;
-int ADC_value_output=0;
 int buffercounter = 0;
 volatile char active_write = 0;
-char active_read = 1;
+
 int ReTrig[NUM_SAMPLES]={0};
 int ImTrig[NUM_SAMPLES]={0};
+float Re = 0;
+float Im = 0;
+
 char trig_count = 0;
-char DFT_ready = 0; //Måske nødvendigt med Volatile
+volatile char DFT_ready = 0; //Måske nødvendigt med Volatile
 enum tilstande {reset, run, calibrate, store};
 char tilstand = run;
 double angle = 0;
@@ -25,8 +26,7 @@ float modulus = 0;
 int DFT_counter = 0;
 char printbuffer[4]={0};
 char DFTBuffer[2][64] = {{0},{0}}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
-float Re = 0; 
-float Im = 0;
+
 char transmitflag = 0;
 volatile char BTN5_flag, BTN4_flag, BTN3_flag;
 char anglecounter = 0;
@@ -34,7 +34,7 @@ double anglebuf[AVERAGE_NUM]= {0};
 char anglebufcnt = 0;
 double anglemean = 0;
 
-//
+
 //char jern[NUM_MATERIAL_SAMPLES] = {0xFF};
 //char kobber[NUM_MATERIAL_SAMPLES] = {0xFF};
 //char messing[NUM_MATERIAL_SAMPLES] = {0xFF};
@@ -57,39 +57,41 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 		switch(tilstand){
 			
 			case run:
-				//sendStrXY("Running",1,7);
+				sendStrXY("Running",1,7);
 				computeDFT();
 				
-// 				if(BTN3_flag == 1){
-// 					_delay_ms(20);
-// 					nextState(calibrate);
-// 					BTN3_flag = 0;
-// 				}
-// 				if(BTN4_flag ==1){
-// 					_delay_ms(20);
-// 					nextState(store);
-// 					BTN4_flag = 0;
-// 				}
-// 				if(BTN5_flag == 1){
-// 					_delay_ms(20);
-// 					nextState(reset);
-// 					BTN5_flag =0;
-// 				}
+				if(BTN3_flag == 1){
+//					_delay_ms(100);
+ 					nextState(calibrate);
+ 					BTN3_flag = 0;
+				}
+				if(BTN4_flag ==1){
+//					_delay_ms(100);
+					nextState(store);
+					BTN4_flag = 0;
+				}
+				if(BTN5_flag == 1){
+//					_delay_ms(100);
+					nextState(reset);
+					BTN5_flag =0;
+				}
 				
 			break;	
 			
 			case calibrate:
 				sendStrXY("Calibrate",1,7);
-			
+				nextState(run);
 			
 			break; 
 			
 			case store:
 				sendStrXY("Store",1,7);
+				nextState(run);
 				
 			break;
 			
 			case reset:
+				nextState(run);
 			
 			break; 
 		}
@@ -248,7 +250,7 @@ char detectMaterial(){
 		for(int i = 0; i<NUM_MATERIALS; i++){
 			hits = 0;
 			for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
-				if(materials[i][j] < (angle+MATERIAL_DIVIATION) && materials[i][j] > (angle-MATERIAL_DIVIATION)){
+				if(materials[i][j] < (angle+MATERIAL_DEVIATION) && materials[i][j] > (angle-MATERIAL_DEVIATION)){
 					hits ++; 
 				}
 				if(hits>result[0]){
@@ -322,12 +324,15 @@ ISR(ADC_vect){
 //}
 	else if(DFT_ready){
 		buffercounter = 0;
+		DFTBuffer[active_write][buffercounter] = ADCH; //Vist også nødvendig
+		buffercounter++;
 	}
 	else{
 		active_write = !active_write;
 		DFT_ready = 1;
 		buffercounter = 0;
 		DFTBuffer[active_write][buffercounter] = ADCH;	//Save remaining first sample 
+		buffercounter++;  //Vist nok nødvendigt
 	}
 }
 
