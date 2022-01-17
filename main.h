@@ -51,6 +51,8 @@
 #define MATERIAL_DEVIATION 2	//deviation from material phase in degrees
 #define AVERAGE_NUM 10
 
+// alu 116 ,  copper -135,   
+
 
 // ================================================
 // Functions
@@ -59,7 +61,8 @@ void setup();
 void nextState(char input);
 void init_trigonometry();
 void computeDFT();
-char detectMaterial();
+char detectPhase();
+void loadMaterials();
 
 int intToAscii(int number);
 void debug_print_char(float input, char x, char y);
