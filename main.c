@@ -210,7 +210,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 		 }
 		 Im = -Im;
 		 modulus =(0.6*modulus)+(0.4*sqrtf((Im*Im) + (Re*Re))/16);
-		 debug_print_char(modulus,2,7);
+		 debug_print_float(modulus,2,7);
 		
 		 if(Im == 0 && Re == 0){
 			 angle = 0;
@@ -236,7 +236,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 // 		 }
 // 		 
 		 
-		 debug_print_char(angle,3,7);
+		 debug_print_float(angle,3,7);
 		 Re = 0;
 		 Im = 0;
 		 anglemean = 0;
@@ -286,7 +286,7 @@ void loadMaterials(){
 // Utils
 // ================================================
 
-void debug_print_char(float input,char x, char y){
+void debug_print_float(float input,char x, char y){
 	char temp[100] = {0};
 	dtostrf(input,4,2,temp);
 	//sprintf(temp,"%d",input);
