@@ -41,11 +41,13 @@
 #define CHKBIT(ADDR, BIT)(ADDR & (1<<BIT))
 #define TOGGLEBIT(ADDR,BIT)(ADDR ^= (1<<BIT))
 
+#define DEBOUNCE 10
+
 #define NUM_SAMPLES 64
 #define BIT_DIV 256
 
 
-#define AMP_THRESHOLD 3
+#define AMP_THRESHOLD 2
 #define PHASE_TOLERANCE 5
 #define NUM_MATERIALS 5
 #define NUM_MATERIAL_SAMPLES 20
@@ -74,8 +76,9 @@ void calibratePhase(char materialID);
 void defaultDisplay();
 void calibrateDisplay();
 int intToAscii(int number);
-void debug_print_char(float input, char x, char y);
+void debug_print_float(float input, char x, char y);
 void printMaterial(char materialID);
+void(* resetFunc) (void);
 
 
 

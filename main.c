@@ -66,17 +66,23 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 				
 				//Calibration button
 				if(BTN3_flag == 1){
-					//disable interrupt
-					//delay
-					//read pin
- 					nextState(select);
+					CLRBIT(EIMSK,INT3);
+					_delay_ms(DEBOUNCE);
+					if(!CHKBIT(PIND,3)){
+						nextState(select);
+					}
  					BTN3_flag = 0;
-					 //enable
+					SETBIT(EIMSK,INT3);
 				}
 
 				if(BTN5_flag == 1){
-					nextState(reset);
+					CLRBIT(EIMSK,INT5);
+					_delay_ms(DEBOUNCE);
+					if(!CHKBIT(PINE,5)){
+						nextState(reset);
+					}
 					BTN5_flag =0;
+					SETBIT(EIMSK,INT5);
 				}
 				break;	
 			
@@ -94,21 +100,32 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			case store:
 				//Select material
 				if(BTN4_flag == 1){
-					materialSelctor ++;
-					if(materialSelctor>=NUM_MATERIALS) materialSelctor = 0; 
-					printMaterial(materialSelctor);
+					CLRBIT(EIMSK,INT4);
+					_delay_ms(DEBOUNCE);
+					if(!CHKBIT(PINE,4)){
+						materialSelctor ++;
+						if(materialSelctor>=NUM_MATERIALS) materialSelctor = 0;
+						printMaterial(materialSelctor);
+					}
 					BTN4_flag = 0;
+					SETBIT(EIMSK,INT4);
 				}
 				
 				//Perform calibration when desired material has been selected
 				if(BTN3_flag == 1){
-					nextState(calibrate);
+					CLRBIT(EIMSK,INT3);
+					_delay_ms(DEBOUNCE);
+					if(!CHKBIT(PINE,3)){
+						nextState(calibrate);
+					}
 					BTN3_flag = 0;
+					SETBIT(EIMSK,INT3);
 				}
 				break;
 			
 			case reset:
-				nextState(run);
+				resetFunc();
+				//nextState(run);
 			
 				break; 
 		}
@@ -221,13 +238,13 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			 Im += ImTrig[i]*(DFTBuffer[!active_write][i]*5)/BIT_DIV;
 		 }
 		 Im = -Im;
-<<<<<<< HEAD
+
 		 modulus =(0.6*modulus)+(0.4*sqrtf((Im*Im) + (Re*Re))/16);
 		 debug_print_float(modulus,2,7);
-=======
+
 		 modulus = (0.6*modulus)+(0.4*sqrtf((Im*Im) + (Re*Re))/16);
-		 debug_print_char(modulus,2,7);
->>>>>>> Artificial_DFT
+		 debug_print_float(modulus,2,7);
+
 		
 		 if(Im == 0 && Re == 0){
 			 angle = 0;
@@ -363,9 +380,10 @@ void calibratePhase(char materialID){
 // Utils
 // ================================================
 
-<<<<<<< HEAD
-void debug_print_float(float input,char x, char y){
-=======
+//Reset function for manual software reset. Address 0
+ void(* resetFunc) (void) = 0;
+
+
 //Print default text on display
 void defaultDisplay(){
 	clear_display();
@@ -404,10 +422,9 @@ void printMaterial(char materialID){
 }
 
 
-void debug_print_char(float input,char x, char y){
->>>>>>> Artificial_DFT
+void debug_print_float(float input,char x, char y){
 	char temp[100] = {0};
-	dtostrf(input,4,2,temp);
+	dtostrf(input,5,2,temp);
 	//sprintf(temp,"%d",input);
 	sendStrXY(temp, x,y);
 }
