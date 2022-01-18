@@ -19,10 +19,15 @@ float Im = 0;
 
 char trig_count = 0;
 volatile char DFT_ready = 0; //Måske nødvendigt med Volatile
-enum tilstande {reset, run, calibrate, store};
+enum tilstande {reset, run, calibrate, select, store};
 char tilstand = run;
+
 double angle = 0;
-float modulus = 0;
+double modulus = 0;
+
+double angleThres[10] = {0};
+char angleCnt = 0;
+
 int DFT_counter = 0;
 char printbuffer[4]={0};
 char DFTBuffer[2][64] = {{0},{0}}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
@@ -32,16 +37,13 @@ volatile char BTN5_flag, BTN4_flag, BTN3_flag;
 char anglecounter = 0;
 double anglebuf[AVERAGE_NUM]= {0};
 char anglebufcnt = 0;
-double anglemean = 0;
 
 
-//char jern[NUM_MATERIAL_SAMPLES] = {0xFF};
-//char kobber[NUM_MATERIAL_SAMPLES] = {0xFF};
-//char messing[NUM_MATERIAL_SAMPLES] = {0xFF};
-//char aluminium[NUM_MATERIAL_SAMPLES] = {0xFF};
+enum default_materials {iron, copper, brass, aluminum, undefined};
+char materialSelctor = undefined;
 
-
-//0:jern, 1:kobber, 2:messing, 3:aluminium
+//Materials buffer
+//0:jern, 1:kobber, 2:messing, 3:aluminum, 4:undefined
 float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	{0xFF},
 	{0xFF}
@@ -58,43 +60,57 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			
 			case run:
 				sendStrXY("Running  ",1,7);
+				
 				computeDFT();
-				if(detectPhase()==3){
-					 sendStrXY("Alu",6,0);
-				}
+				printMaterial(detectPhase());
 				
-				
+				//Calibration button
 				if(BTN3_flag == 1){
- 					nextState(calibrate);
+					//disable interrupt
+					//delay
+					//read pin
+ 					nextState(select);
  					BTN3_flag = 0;
+					 //enable
 				}
-				if(BTN4_flag ==1){
-					nextState(store);
-					BTN4_flag = 0;
-				}
+
 				if(BTN5_flag == 1){
 					nextState(reset);
 					BTN5_flag =0;
 				}
-				
-			break;	
+				break;	
 			
 			case calibrate:
-				sendStrXY("Calibrate",1,7);
+				calibratePhase(materialSelctor);
+				defaultDisplay();
 				nextState(run);
+				break; 
 			
-			break; 
+			case select:
+				calibrateDisplay();
+				nextState(store);				
+				break;
 			
 			case store:
-				sendStrXY("Store",1,7);
-				nextState(run);
+				//Select material
+				if(BTN4_flag == 1){
+					materialSelctor ++;
+					if(materialSelctor>=NUM_MATERIALS) materialSelctor = 0; 
+					printMaterial(materialSelctor);
+					BTN4_flag = 0;
+				}
 				
-			break;
+				//Perform calibration when desired material has been selected
+				if(BTN3_flag == 1){
+					nextState(calibrate);
+					BTN3_flag = 0;
+				}
+				break;
 			
 			case reset:
 				nextState(run);
 			
-			break; 
+				break; 
 		}
 	}
  }
@@ -135,11 +151,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 I2C_Init();
 	 InitializeDisplay();
 	 print_fonts();
-	 clear_display();
-	 sendStrXY("AMP",2,0);
-	 sendStrXY("Angle:",3,0);
-	 sendStrXY("Mode:",1,0);
-	 sendStrXY("Material:",5,0);
+	defaultDisplay();
 	
 	 //init_timer0();
 	 init_timer0();
@@ -200,83 +212,148 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 
 
 //Compute DFT for latest sample
- void computeDFT(){
+//Returns true if DFT was succesfully calculated, false otherwise
+ char computeDFT(){
 	 if(DFT_ready == 1){
 		 
 		 for(int i = 0; i<NUM_SAMPLES; i++){
 			 Re += ReTrig[i]*(DFTBuffer[!active_write][i]*5)/BIT_DIV;
 			 Im += ImTrig[i]*(DFTBuffer[!active_write][i]*5)/BIT_DIV;
-			 //Im = -Im;
 		 }
 		 Im = -Im;
+<<<<<<< HEAD
 		 modulus =(0.6*modulus)+(0.4*sqrtf((Im*Im) + (Re*Re))/16);
 		 debug_print_float(modulus,2,7);
+=======
+		 modulus = (0.6*modulus)+(0.4*sqrtf((Im*Im) + (Re*Re))/16);
+		 debug_print_char(modulus,2,7);
+>>>>>>> Artificial_DFT
 		
 		 if(Im == 0 && Re == 0){
 			 angle = 0;
 		 }
 		 else{
 		     angle = (0.6*angle)+((0.4*(180/M_PI)*atan2((double)Im, (double)Re)));
-		 }
-// ================================================
-// Moving average function - no longer necessary
-// ================================================		 
-		 // Averaging with AVERAGE_NUM-number of calculated angles.
-		 
-// 		 anglebuf[anglebufcnt]=angle;
-// 		 anglebufcnt++;
-// 		 
-// 		 for(int i = 0; i<AVERAGE_NUM; i++){
-// 			 anglemean += anglebuf[i];
-// 			 
-// 		 }
-// 		 anglemean = anglemean/AVERAGE_NUM; //Eller divider med Average_num
-// 		 if(anglebufcnt == AVERAGE_NUM){
-// 			 anglebufcnt = 0;
-// 		 }
-// 		 
+		 }	
+		 //Save to phase history  
+		 angleThres[angleCnt] = angle;
+		 angleCnt ++; 
+		 if(angleCnt >= 10) angleCnt = 0; 
 		 
 		 debug_print_float(angle,3,7);
 		 Re = 0;
 		 Im = 0;
-		 anglemean = 0;
 		 DFT_ready = 0;
+		 return 1; 
 	 }
+	 return 0;
  }
 
 
 // ================================================
 // Main functionality
 // ================================================
+
+//Detect material from signal phase
+//Returns material ID if phase is matched. 0xFF otherwise
 char detectPhase(){
 	
 	//Check if signal amplitude is above threshold
 	if(modulus>AMP_THRESHOLD){
-		//Detect material from phase
-		char result[2] = {0};
-		char hits = 0;
-		for(int i = 0; i<NUM_MATERIALS; i++){
-			hits = 0;
-			for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
-				if(materials[i][j] < (angle+MATERIAL_DEVIATION) && materials[i][j] > (angle-MATERIAL_DEVIATION)){
-					hits ++; 
-				}
-				if(hits>result[0]){
-					 result[0]=hits;
-					 result[1]=i;	//Save material with most hits
+		//Check stability of phase
+		if(checkPhaseStability()){
+			
+			//Detect material from phase
+			char result[2] = {0,undefined};
+			char hits = 0;
+			for(int i = 0; i<NUM_MATERIALS-1; i++){
+				hits = 0;
+				for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
+					if(materials[i][j] < (angle+MATERIAL_DEVIATION) && materials[i][j] > (angle-MATERIAL_DEVIATION)){
+						hits ++; 
+					}
+					if(hits>result[0]){
+						 result[0]=hits;
+						 result[1]=i;	//Save material with most hits
+					}
 				}
 			}
+			//Return material with most matched phase "hits"
+			return result[1];
 		}
-		//Return material with most matched phase "hits"
-		return result[1];
 	}
-	return 0xFF;
+	return undefined;
+}
+
+//Pre-load default material phases
+void loadMaterials(){
+	//Iron
+	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
+		materials[iron][i] = IRON_PHASE;
+	}
+	//Copper
+	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
+		materials[copper][i] = COPPER_PHASE; 
+	}
+
+	//Brass
+	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
+		materials[brass][i] = BRASS_PHASE;
+	}
+	//Aluminum
+	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
+		materials[aluminum][i] = ALUMINUM_PHASE;
+	}
 }
 
 
-void loadMaterials(){
-	for(int i = 0; i< NUM_MATERIAL_SAMPLES; i++){
-		materials[3][i] = 116; 
+//Check if phase from latest X samples is stable(within threshold)
+//Returns TRUE if phase is stable. FALSE otherwise
+char checkPhaseStability(){
+	for(int i = 0; i<NUM_PHASE_STABILITY_SAMPLES; i++){
+		 if(angleThres[i] > angle+PHASE_TOLERANCE || angleThres[i] < angle-PHASE_TOLERANCE) return false;
+	}
+	return true;
+}
+
+
+//Calibrates phase detection by saving samples to memory. User specifies material in menu
+//INPUT: material ID to sample
+void calibratePhase(char materialID){	
+	char numAttempts = 0; 
+	//Normal materials
+	if(materialID < 4){
+		for(int i = 0; i<NUM_MATERIAL_SAMPLES;){
+			if(computeDFT()){	
+				if(modulus>AMP_THRESHOLD){
+					//Check stability of phase
+					if(checkPhaseStability()){
+						materials[materialID][i] = angle;
+						i++;
+						continue;
+					}
+				}
+				//Error handling
+				numAttempts ++;
+				if(numAttempts>NUM_MATERIAL_SAMPLES) return;
+			}
+		}
+	}
+	//Background noise (should be 0)
+	else{
+		for(int i = 0; i<NUM_MATERIAL_SAMPLES;){
+			if(computeDFT()){
+				//Check stability of phase
+				if(checkPhaseStability()){
+					materials[undefined][i] = angle;
+					i++;
+					continue;
+				}
+				//Error handling
+				numAttempts ++;
+				if(numAttempts>NUM_MATERIAL_SAMPLES) return;
+			}
+		}
 	}
 }
 
@@ -286,12 +363,59 @@ void loadMaterials(){
 // Utils
 // ================================================
 
+<<<<<<< HEAD
 void debug_print_float(float input,char x, char y){
+=======
+//Print default text on display
+void defaultDisplay(){
+	clear_display();
+	sendStrXY("Mode:",1,0);
+	sendStrXY("AMP",2,0);
+	sendStrXY("Angle:",3,0);
+	sendStrXY("Material:",5,0);
+}
+
+void calibrateDisplay(){
+	clear_display();
+	sendStrXY("Select material",1,0);
+	sendStrXY("Material:",5,0);
+}
+
+//Prints material to display
+//INPUT: material ID
+void printMaterial(char materialID){
+	switch(materialID){
+		case iron:
+			sendStrXY("IRO",5,10);
+			break;
+		case copper:
+			sendStrXY("COP",5,10);
+			break;
+		case brass:
+			sendStrXY("BRA",5,10);
+			break;
+		case aluminum:
+			sendStrXY("ALU",5,10);
+			break;
+		case undefined:
+			sendStrXY("UND",5,10);
+			break;
+	}
+}
+
+
+void debug_print_char(float input,char x, char y){
+>>>>>>> Artificial_DFT
 	char temp[100] = {0};
 	dtostrf(input,4,2,temp);
 	//sprintf(temp,"%d",input);
 	sendStrXY(temp, x,y);
 }
+
+
+
+
+
 
 
 

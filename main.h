@@ -45,14 +45,20 @@
 #define BIT_DIV 256
 
 
-#define AMP_THRESHOLD 1
-#define NUM_MATERIALS 4
+#define AMP_THRESHOLD 3
+#define PHASE_TOLERANCE 5
+#define NUM_MATERIALS 5
 #define NUM_MATERIAL_SAMPLES 20
 #define MATERIAL_DEVIATION 2	//deviation from material phase in degrees
 #define AVERAGE_NUM 10
+#define NUM_PHASE_STABILITY_SAMPLES 10
 
-// alu 116 ,  copper -135,   
+#define IRON_PHASE	10
+#define COPPER_PHASE -40
+#define BRASS_PHASE 10
+#define ALUMINUM_PHASE -61
 
+//TODO calibration
 
 // ================================================
 // Functions
@@ -60,13 +66,16 @@
 void setup();
 void nextState(char input);
 void init_trigonometry();
-void computeDFT();
+char computeDFT();
 char detectPhase();
 void loadMaterials();
-
+char checkPhaseStability();
+void calibratePhase(char materialID);
+void defaultDisplay();
+void calibrateDisplay();
 int intToAscii(int number);
 void debug_print_char(float input, char x, char y);
-
+void printMaterial(char materialID);
 
 
 
