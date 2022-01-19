@@ -664,9 +664,9 @@ END GROUP
  .text.checkPhaseStability
                 0x000007c2       0xa2 main.o
                 0x000007c2                checkPhaseStability
- .text.detectPhase
+ .text.detectMaterial
                 0x00000864      0x112 main.o
-                0x00000864                detectPhase
+                0x00000864                detectMaterial
  .text.defaultDisplay
                 0x00000976       0x3c main.o
                 0x00000976                defaultDisplay
@@ -1061,18 +1061,18 @@ END GROUP
  .debug_frame   0x000003dc      0x2f0 ssd1306.o
  .debug_frame   0x000006cc       0x84 Timer.o
 
-.debug_str      0x00000000      0xc28
+.debug_str      0x00000000      0xc2b
  *(.debug_str)
  .debug_str     0x00000000      0x3e6 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega2560/avr6/crtatmega2560.o
  .debug_str     0x000003e6      0x1a3 ADC.o
                                 0x1ea (size before relaxing)
  .debug_str     0x00000589      0x12d I2C.o
                                 0x259 (size before relaxing)
- .debug_str     0x000006b6      0x361 main.o
-                                0x516 (size before relaxing)
- .debug_str     0x00000a17      0x1ab ssd1306.o
+ .debug_str     0x000006b6      0x364 main.o
+                                0x519 (size before relaxing)
+ .debug_str     0x00000a1a      0x1ab ssd1306.o
                                 0x3af (size before relaxing)
- .debug_str     0x00000bc2       0x66 Timer.o
+ .debug_str     0x00000bc5       0x66 Timer.o
                                 0x1fc (size before relaxing)
 
 .debug_loc      0x00000000     0x1a8b

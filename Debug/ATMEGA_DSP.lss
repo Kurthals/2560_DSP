@@ -23,11 +23,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  00000750  00000000  00000000  00007dec  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000c28  00000000  00000000  0000853c  2**0
+ 10 .debug_str    00000c2b  00000000  00000000  0000853c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00001a8b  00000000  00000000  00009164  2**0
+ 11 .debug_loc    00001a8b  00000000  00000000  00009167  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000002d8  00000000  00000000  0000abef  2**0
+ 12 .debug_ranges 000002d8  00000000  00000000  0000abf2  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -908,13 +908,13 @@ char checkPhaseStability(){
      860:	8f 90       	pop	r8
      862:	08 95       	ret
 
-00000864 <detectPhase>:
+00000864 <detectMaterial>:
 // Main functionality
 // ================================================
 
 //Detect material from signal phase
 //Returns material ID if phase is matched. 0xFF otherwise
-char detectPhase(){
+char detectMaterial(){
      864:	4f 92       	push	r4
      866:	5f 92       	push	r5
      868:	6f 92       	push	r6
@@ -943,14 +943,17 @@ char detectPhase(){
      898:	50 e4       	ldi	r21, 0x40	; 64
      89a:	0e 94 5c 0c 	call	0x18b8	; 0x18b8 <__gesf2>
      89e:	18 16       	cp	r1, r24
-     8a0:	0c f0       	brlt	.+2      	; 0x8a4 <detectPhase+0x40>
-     8a2:	56 c0       	rjmp	.+172    	; 0x950 <detectPhase+0xec>
+     8a0:	0c f0       	brlt	.+2      	; 0x8a4 <detectMaterial+0x40>
+     8a2:	56 c0       	rjmp	.+172    	; 0x950 <detectMaterial+0xec>
 		//Check stability of phase
 		if(checkPhaseStability()){
      8a4:	8e df       	rcall	.-228    	; 0x7c2 <checkPhaseStability>
      8a6:	88 23       	and	r24, r24
-     8a8:	09 f4       	brne	.+2      	; 0x8ac <detectPhase+0x48>
-     8aa:	54 c0       	rjmp	.+168    	; 0x954 <detectPhase+0xf0>
+     8a8:	09 f4       	brne	.+2      	; 0x8ac <detectMaterial+0x48>
+     8aa:	54 c0       	rjmp	.+168    	; 0x954 <detectMaterial+0xf0>
+			
+			//Turn on LED
+			//SETBIT(PORTB,5);
 			
 			//Detect material from phase
 			char result[2] = {0,undefined};
@@ -962,7 +965,7 @@ char detectPhase(){
 			for(int i = 0; i<NUM_MATERIALS-1; i++){
      8b4:	00 e0       	ldi	r16, 0x00	; 0
      8b6:	10 e0       	ldi	r17, 0x00	; 0
-     8b8:	46 c0       	rjmp	.+140    	; 0x946 <detectPhase+0xe2>
+     8b8:	46 c0       	rjmp	.+140    	; 0x946 <detectMaterial+0xe2>
 				hits = 0;
 				for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
 					if(materials[i][j] < (angle+MATERIAL_DEVIATION) && materials[i][j] > (angle-MATERIAL_DEVIATION)){
@@ -1001,7 +1004,7 @@ char detectPhase(){
      902:	b4 01       	movw	r22, r8
      904:	98 d6       	rcall	.+3376   	; 0x1636 <__cmpsf2>
      906:	88 23       	and	r24, r24
-     908:	7c f4       	brge	.+30     	; 0x928 <detectPhase+0xc4>
+     908:	7c f4       	brge	.+30     	; 0x928 <detectMaterial+0xc4>
      90a:	20 e0       	ldi	r18, 0x00	; 0
      90c:	30 e0       	ldi	r19, 0x00	; 0
      90e:	40 e0       	ldi	r20, 0x00	; 0
@@ -1015,13 +1018,13 @@ char detectPhase(){
      91e:	b4 01       	movw	r22, r8
      920:	cb d7       	rcall	.+3990   	; 0x18b8 <__gesf2>
      922:	18 16       	cp	r1, r24
-     924:	0c f4       	brge	.+2      	; 0x928 <detectPhase+0xc4>
+     924:	0c f4       	brge	.+2      	; 0x928 <detectMaterial+0xc4>
 						hits ++; 
      926:	f3 94       	inc	r15
 					}
 					if(hits>result[0]){
      928:	ef 14       	cp	r14, r15
-     92a:	10 f4       	brcc	.+4      	; 0x930 <detectPhase+0xcc>
+     92a:	10 f4       	brcc	.+4      	; 0x930 <detectMaterial+0xcc>
 						 result[0]=hits;
      92c:	ef 2c       	mov	r14, r15
 						 result[1]=i;	//Save material with most hits
@@ -1033,15 +1036,15 @@ char detectPhase(){
 				hits = 0;
 				for(int j = 0; j<NUM_MATERIAL_SAMPLES; j++){
      930:	21 96       	adiw	r28, 0x01	; 1
-     932:	03 c0       	rjmp	.+6      	; 0x93a <detectPhase+0xd6>
+     932:	03 c0       	rjmp	.+6      	; 0x93a <detectMaterial+0xd6>
      934:	c0 e0       	ldi	r28, 0x00	; 0
      936:	d0 e0       	ldi	r29, 0x00	; 0
      938:	f1 2c       	mov	r15, r1
      93a:	c4 31       	cpi	r28, 0x14	; 20
      93c:	d1 05       	cpc	r29, r1
-     93e:	0c f4       	brge	.+2      	; 0x942 <detectPhase+0xde>
-     940:	bc cf       	rjmp	.-136    	; 0x8ba <detectPhase+0x56>
-		if(checkPhaseStability()){
+     93e:	0c f4       	brge	.+2      	; 0x942 <detectMaterial+0xde>
+     940:	bc cf       	rjmp	.-136    	; 0x8ba <detectMaterial+0x56>
+			//SETBIT(PORTB,5);
 			
 			//Detect material from phase
 			char result[2] = {0,undefined};
@@ -1051,7 +1054,7 @@ char detectPhase(){
      944:	1f 4f       	sbci	r17, 0xFF	; 255
      946:	04 30       	cpi	r16, 0x04	; 4
      948:	11 05       	cpc	r17, r1
-     94a:	a4 f3       	brlt	.-24     	; 0x934 <detectPhase+0xd0>
+     94a:	a4 f3       	brlt	.-24     	; 0x934 <detectMaterial+0xd0>
 						 result[1]=i;	//Save material with most hits
 					}
 				}
@@ -1059,12 +1062,12 @@ char detectPhase(){
 			//Return material with most matched phase "hits"
 			return result[1];
      94c:	8d 2d       	mov	r24, r13
-     94e:	03 c0       	rjmp	.+6      	; 0x956 <detectPhase+0xf2>
+     94e:	03 c0       	rjmp	.+6      	; 0x956 <detectMaterial+0xf2>
 		}
 	}
 	return undefined;
      950:	84 e0       	ldi	r24, 0x04	; 4
-     952:	01 c0       	rjmp	.+2      	; 0x956 <detectPhase+0xf2>
+     952:	01 c0       	rjmp	.+2      	; 0x956 <detectMaterial+0xf2>
      954:	84 e0       	ldi	r24, 0x04	; 4
 }
      956:	df 91       	pop	r29
@@ -1131,7 +1134,7 @@ void defaultDisplay(){
 
  void setup(){
 	 
-	 //Setup ADC PORT
+	 //Setup 2kHz square pulse
 	 SETBIT(DDRB,6);
      9b2:	84 b1       	in	r24, 0x04	; 4
      9b4:	80 64       	ori	r24, 0x40	; 64
@@ -1140,17 +1143,20 @@ void defaultDisplay(){
      9b8:	85 b1       	in	r24, 0x05	; 5
      9ba:	8f 7b       	andi	r24, 0xBF	; 191
      9bc:	85 b9       	out	0x05, r24	; 5
+// 	 //Setup LED-blinker
+// 	 SETBIT(DDRB,5);
+// 	 CLRBIT(PORTB,5);
 	 
 	 //Setup PINS for buttons
-	 CLRBIT(DDRE,5); //PE5 int5 pin3
+	 CLRBIT(DDRE,5); //PE5 int5 pin3  RESET
      9be:	8d b1       	in	r24, 0x0d	; 13
      9c0:	8f 7d       	andi	r24, 0xDF	; 223
      9c2:	8d b9       	out	0x0d, r24	; 13
-	 CLRBIT(DDRE,4); //PE4 int4 pin2
+	 CLRBIT(DDRE,4); //PE4 int4 pin2  SELECT
      9c4:	8d b1       	in	r24, 0x0d	; 13
      9c6:	8f 7e       	andi	r24, 0xEF	; 239
      9c8:	8d b9       	out	0x0d, r24	; 13
-	 CLRBIT(DDRD,3); //PD3 int3 pin18
+	 CLRBIT(DDRD,3); //PD3 int3 pin18 CALIBRATE
      9ca:	8a b1       	in	r24, 0x0a	; 10
      9cc:	87 7f       	andi	r24, 0xF7	; 247
      9ce:	8a b9       	out	0x0a, r24	; 10
@@ -1202,7 +1208,7 @@ void defaultDisplay(){
      a06:	69 d4       	rcall	.+2258   	; 0x12da <InitializeDisplay>
 	 print_fonts();
      a08:	fc d4       	rcall	.+2552   	; 0x1402 <print_fonts>
-	defaultDisplay();
+	 defaultDisplay();
      a0a:	b5 df       	rcall	.-150    	; 0x976 <defaultDisplay>
 	
 	 //init_timer0();
@@ -2038,11 +2044,13 @@ void calibratePhase(char materialID){
 				
 				computeDFT();
      ff4:	d8 d1       	rcall	.+944    	; 0x13a6 <sendStrXY>
-				printMaterial(detectPhase());
+				printMaterial(detectMaterial());
      ff6:	89 dd       	rcall	.-1262   	; 0xb0a <computeDFT>
-     ff8:	35 dc       	rcall	.-1942   	; 0x864 <detectPhase>
+     ff8:	35 dc       	rcall	.-1942   	; 0x864 <detectMaterial>
      ffa:	1c dd       	rcall	.-1480   	; 0xa34 <printMaterial>
      ffc:	80 91 b4 05 	lds	r24, 0x05B4	; 0x8005b4 <BTN3_flag>
+				//TURN off LED
+				//CLRBIT(PORTB,5);
 				
 				//Calibration button
 				if(BTN3_flag == 1){

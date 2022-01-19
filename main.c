@@ -30,7 +30,7 @@ char angleCnt = 0;
 
 int DFT_counter = 0;
 char printbuffer[4]={0};
-char DFTBuffer[2][64] = {{0},{0}}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
+char DFTBuffer[2][64] = {{0},{0}}; 
 volatile char init_flag = 0;
 char transmitflag = 0;
 volatile char BTN5_flag, BTN4_flag, BTN3_flag;
@@ -62,7 +62,9 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 				sendStrXY("Running  ",1,7);
 				
 				computeDFT();
-				printMaterial(detectPhase());
+				printMaterial(detectMaterial());
+				//TURN off LED
+				//CLRBIT(PORTB,5);
 				
 				//Calibration button
 				if(BTN3_flag == 1){
@@ -140,14 +142,18 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 
  void setup(){
 	 
-	 //Setup ADC PORT
+	 //Setup 2kHz square pulse
 	 SETBIT(DDRB,6);
 	 CLRBIT(PORTB,6);
 	 
+// 	 //Setup LED-blinker
+// 	 SETBIT(DDRB,5);
+// 	 CLRBIT(PORTB,5);
+	 
 	 //Setup PINS for buttons
-	 CLRBIT(DDRE,5); //PE5 int5 pin3
-	 CLRBIT(DDRE,4); //PE4 int4 pin2
-	 CLRBIT(DDRD,3); //PD3 int3 pin18
+	 CLRBIT(DDRE,5); //PE5 int5 pin3  RESET
+	 CLRBIT(DDRE,4); //PE4 int4 pin2  SELECT
+	 CLRBIT(DDRD,3); //PD3 int3 pin18 CALIBRATE
 	 //Internal Pull-up on inputs
 	 SETBIT(PORTE,5); 
 	 SETBIT(PORTE,4);
@@ -168,7 +174,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 I2C_Init();
 	 InitializeDisplay();
 	 print_fonts();
-	defaultDisplay();
+	 defaultDisplay();
 	
 	 //init_timer0();
 	 init_timer0();
@@ -273,12 +279,15 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 
 //Detect material from signal phase
 //Returns material ID if phase is matched. 0xFF otherwise
-char detectPhase(){
+char detectMaterial(){
 	
 	//Check if signal amplitude is above threshold
 	if(modulus>AMP_THRESHOLD){
 		//Check stability of phase
 		if(checkPhaseStability()){
+			
+			//Turn on LED
+			//SETBIT(PORTB,5);
 			
 			//Detect material from phase
 			char result[2] = {0,undefined};
