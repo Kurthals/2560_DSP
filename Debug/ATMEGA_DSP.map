@@ -597,7 +597,6 @@ END GROUP
                 0x0000054c                __vector_31
                 0x0000054c                __vector_35
                 0x0000054c                __vector_39
-                0x0000054c                __vector_3
                 0x0000054c                __vector_23
                 0x0000054c                __vector_30
                 0x0000054c                __vector_45
@@ -613,6 +612,7 @@ END GROUP
                 0x0000054c                __vector_41
                 0x0000054c                __vector_43
                 0x0000054c                __vector_27
+                0x0000054c                __vector_5
                 0x0000054c                __vector_33
                 0x0000054c                __vector_47
                 0x0000054c                __vector_52
@@ -698,9 +698,9 @@ END GROUP
  .text.__vector_4
                 0x00001256       0x2c main.o
                 0x00001256                __vector_4
- .text.__vector_5
+ .text.__vector_3
                 0x00001282       0x2c main.o
-                0x00001282                __vector_5
+                0x00001282                __vector_3
  .text.__vector_6
                 0x000012ae       0x2c main.o
                 0x000012ae                __vector_6

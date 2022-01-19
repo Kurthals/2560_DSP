@@ -39,10 +39,10 @@ Disassembly of section .text:
        6:	00 00       	nop
        8:	a1 c2       	rjmp	.+1346   	; 0x54c <__bad_interrupt>
        a:	00 00       	nop
-       c:	9f c2       	rjmp	.+1342   	; 0x54c <__bad_interrupt>
-       e:	00 00       	nop
+       c:	0c 94 41 09 	jmp	0x1282	; 0x1282 <__vector_3>
       10:	0c 94 2b 09 	jmp	0x1256	; 0x1256 <__vector_4>
-      14:	0c 94 41 09 	jmp	0x1282	; 0x1282 <__vector_5>
+      14:	9b c2       	rjmp	.+1334   	; 0x54c <__bad_interrupt>
+      16:	00 00       	nop
       18:	0c 94 57 09 	jmp	0x12ae	; 0x12ae <__vector_6>
       1c:	97 c2       	rjmp	.+1326   	; 0x54c <__bad_interrupt>
       1e:	00 00       	nop
@@ -1160,15 +1160,15 @@ void defaultDisplay(){
      9ce:	85 b9       	out	0x05, r24	; 5
 	 
 	 //Setup PINS for buttons
-	 CLRBIT(DDRE,5); //PE5 int5 pin3
+	 CLRBIT(DDRE,5); //PE5 int5 pin3 (RESET)
      9d0:	8d b1       	in	r24, 0x0d	; 13
      9d2:	8f 7d       	andi	r24, 0xDF	; 223
      9d4:	8d b9       	out	0x0d, r24	; 13
-	 CLRBIT(DDRE,4); //PE4 int4 pin2
-     9d6:	8d b1       	in	r24, 0x0d	; 13
-     9d8:	8f 7e       	andi	r24, 0xEF	; 239
-     9da:	8d b9       	out	0x0d, r24	; 13
-	 CLRBIT(DDRD,3); //PD3 int3 pin18
+	 CLRBIT(DDRD,2); //PE4 int2 pin2 (SET)
+     9d6:	8a b1       	in	r24, 0x0a	; 10
+     9d8:	8b 7f       	andi	r24, 0xFB	; 251
+     9da:	8a b9       	out	0x0a, r24	; 10
+	 CLRBIT(DDRD,3); //PD3 int3 pin18 (CALIBRATE)
      9dc:	8a b1       	in	r24, 0x0a	; 10
      9de:	87 7f       	andi	r24, 0xF7	; 247
      9e0:	8a b9       	out	0x0a, r24	; 10
@@ -1177,33 +1177,33 @@ void defaultDisplay(){
      9e2:	8e b1       	in	r24, 0x0e	; 14
      9e4:	80 62       	ori	r24, 0x20	; 32
      9e6:	8e b9       	out	0x0e, r24	; 14
-	 SETBIT(PORTE,4);
-     9e8:	8e b1       	in	r24, 0x0e	; 14
-     9ea:	80 61       	ori	r24, 0x10	; 16
-     9ec:	8e b9       	out	0x0e, r24	; 14
+	 SETBIT(PORTD,2);
+     9e8:	8b b1       	in	r24, 0x0b	; 11
+     9ea:	84 60       	ori	r24, 0x04	; 4
+     9ec:	8b b9       	out	0x0b, r24	; 11
 	 SETBIT(PORTD,3);
      9ee:	8b b1       	in	r24, 0x0b	; 11
      9f0:	88 60       	ori	r24, 0x08	; 8
      9f2:	8b b9       	out	0x0b, r24	; 11
 	 
 	 //Configure falling edge detection on pins:
-	 EICRA |= (1<<ISC31);
+	 EICRA |= (1<<ISC31) | (1<<ISC21);
      9f4:	e9 e6       	ldi	r30, 0x69	; 105
      9f6:	f0 e0       	ldi	r31, 0x00	; 0
      9f8:	80 81       	ld	r24, Z
-     9fa:	80 68       	ori	r24, 0x80	; 128
+     9fa:	80 6a       	ori	r24, 0xA0	; 160
      9fc:	80 83       	st	Z, r24
-	 EICRB |= (1<<ISC41) | (1<<ISC51) ;	
+	 EICRB |= (1<<ISC51) ;	
      9fe:	ea e6       	ldi	r30, 0x6A	; 106
      a00:	f0 e0       	ldi	r31, 0x00	; 0
      a02:	80 81       	ld	r24, Z
-     a04:	8a 60       	ori	r24, 0x0A	; 10
+     a04:	88 60       	ori	r24, 0x08	; 8
      a06:	80 83       	st	Z, r24
 	 
 	 //Enable interrupts with EIMSK:
-	 EIMSK |= (1<<INT5) | (1<<INT4) | (1<<INT3);
+	 EIMSK |= (1<<INT5) | (1<<INT2) | (1<<INT3);
      a08:	8d b3       	in	r24, 0x1d	; 29
-     a0a:	88 63       	ori	r24, 0x38	; 56
+     a0a:	8c 62       	ori	r24, 0x2C	; 44
      a0c:	8d bb       	out	0x1d, r24	; 29
 	 
 	 //Enable global interrupt
@@ -2164,8 +2164,8 @@ void calibratePhase(char materialID){
     1088:	81 30       	cpi	r24, 0x01	; 1
     108a:	e1 f4       	brne	.+56     	; 0x10c4 <__EEPROM_REGION_LENGTH__+0xc4>
     108c:	8d b3       	in	r24, 0x1d	; 29
-					CLRBIT(EIMSK,INT4);
-    108e:	8f 7e       	andi	r24, 0xEF	; 239
+					CLRBIT(EIMSK,INT2);
+    108e:	8b 7f       	andi	r24, 0xFB	; 251
     1090:	8d bb       	out	0x1d, r24	; 29
     1092:	8f e3       	ldi	r24, 0x3F	; 63
     1094:	9c e9       	ldi	r25, 0x9C	; 156
@@ -2173,9 +2173,9 @@ void calibratePhase(char materialID){
     1098:	f1 f7       	brne	.-4      	; 0x1096 <__EEPROM_REGION_LENGTH__+0x96>
     109a:	00 c0       	rjmp	.+0      	; 0x109c <__EEPROM_REGION_LENGTH__+0x9c>
     109c:	00 00       	nop
-    109e:	64 99       	sbic	0x0c, 4	; 12
+    109e:	4a 99       	sbic	0x09, 2	; 9
 					_delay_ms(DEBOUNCE);
-					if(!CHKBIT(PINE,4)){
+					if(!CHKBIT(PIND,2)){
     10a0:	0c c0       	rjmp	.+24     	; 0x10ba <__EEPROM_REGION_LENGTH__+0xba>
 						materialSelctor ++;
     10a2:	80 91 90 03 	lds	r24, 0x0390	; 0x800390 <materialSelctor>
@@ -2192,8 +2192,8 @@ void calibratePhase(char materialID){
 					}
 					BTN4_flag = 0;
     10be:	8d b3       	in	r24, 0x1d	; 29
-					SETBIT(EIMSK,INT4);
-    10c0:	80 61       	ori	r24, 0x10	; 16
+					SETBIT(EIMSK,INT2);
+    10c0:	84 60       	ori	r24, 0x04	; 4
     10c2:	8d bb       	out	0x1d, r24	; 29
     10c4:	80 91 b4 05 	lds	r24, 0x05B4	; 0x8005b4 <BTN3_flag>
 				}
@@ -2463,9 +2463,9 @@ ISR(INT3_vect){
     127e:	1f 90       	pop	r1
     1280:	18 95       	reti
 
-00001282 <__vector_5>:
+00001282 <__vector_3>:
 
-ISR(INT4_vect){
+ISR(INT2_vect){
     1282:	1f 92       	push	r1
     1284:	0f 92       	push	r0
     1286:	0f b6       	in	r0, 0x3f	; 63
@@ -2475,10 +2475,10 @@ ISR(INT4_vect){
 	if(init_flag == 1){
     128e:	80 91 dc 03 	lds	r24, 0x03DC	; 0x8003dc <__data_end>
     1292:	81 30       	cpi	r24, 0x01	; 1
-    1294:	19 f4       	brne	.+6      	; 0x129c <__vector_5+0x1a>
+    1294:	19 f4       	brne	.+6      	; 0x129c <__vector_3+0x1a>
 		init_flag = 0;
     1296:	10 92 dc 03 	sts	0x03DC, r1	; 0x8003dc <__data_end>
-    129a:	03 c0       	rjmp	.+6      	; 0x12a2 <__vector_5+0x20>
+    129a:	03 c0       	rjmp	.+6      	; 0x12a2 <__vector_3+0x20>
 	}
 	else{
 		BTN4_flag = 1;

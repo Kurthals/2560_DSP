@@ -103,15 +103,15 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 			case store:
 				//Select material
 				if(BTN4_flag == 1){
-					CLRBIT(EIMSK,INT4);
+					CLRBIT(EIMSK,INT2);
 					_delay_ms(DEBOUNCE);
-					if(!CHKBIT(PINE,4)){
+					if(!CHKBIT(PIND,2)){
 						materialSelctor ++;
 						if(materialSelctor>=NUM_MATERIALS) materialSelctor = 0;
 						printMaterial(materialSelctor);
 					}
 					BTN4_flag = 0;
-					SETBIT(EIMSK,INT4);
+					SETBIT(EIMSK,INT2);
 				}
 				
 				//Perform calibration when desired material has been selected
@@ -152,20 +152,20 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 CLRBIT(PORTB,5);
 	 
 	 //Setup PINS for buttons
-	 CLRBIT(DDRE,5); //PE5 int5 pin3
-	 CLRBIT(DDRE,4); //PE4 int4 pin2
-	 CLRBIT(DDRD,3); //PD3 int3 pin18
+	 CLRBIT(DDRE,5); //PE5 int5 pin3 (RESET)
+	 CLRBIT(DDRD,2); //PE4 int2 pin2 (SET)
+	 CLRBIT(DDRD,3); //PD3 int3 pin18 (CALIBRATE)
 	 //Internal Pull-up on inputs
 	 SETBIT(PORTE,5); 
-	 SETBIT(PORTE,4);
+	 SETBIT(PORTD,2);
 	 SETBIT(PORTD,3);
 	 
 	 //Configure falling edge detection on pins:
-	 EICRA |= (1<<ISC31);
-	 EICRB |= (1<<ISC41) | (1<<ISC51) ;	
+	 EICRA |= (1<<ISC31) | (1<<ISC21);
+	 EICRB |= (1<<ISC51) ;	
 	 
 	 //Enable interrupts with EIMSK:
-	 EIMSK |= (1<<INT5) | (1<<INT4) | (1<<INT3);
+	 EIMSK |= (1<<INT5) | (1<<INT2) | (1<<INT3);
 	 
 	 //Enable global interrupt
 	 sei();
@@ -501,7 +501,7 @@ ISR(INT3_vect){
 	}
 }
 
-ISR(INT4_vect){
+ISR(INT2_vect){
 	if(init_flag == 1){
 		init_flag = 0;
 	}
