@@ -69,7 +69,7 @@ void setup();
 void nextState(char input);
 void init_trigonometry();
 char computeDFT();
-char detectPhase();
+char detectMaterial();
 void loadMaterials();
 char checkPhaseStability();
 void calibratePhase(char materialID);

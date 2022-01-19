@@ -62,7 +62,10 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 				sendStrXY("Running  ",1,7);
 				
 				computeDFT();
-				printMaterial(detectPhase());
+				printMaterial(detectMaterial());
+				
+				//Cler status LED
+				CLRBIT(PORTB,5);
 				
 				//Calibration button
 				if(BTN3_flag == 1){
@@ -143,6 +146,10 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 //Setup ADC PORT
 	 SETBIT(DDRB,6);
 	 CLRBIT(PORTB,6);
+	 
+	 //Setup LED PORT
+	 SETBIT(DDRB,5);
+	 CLRBIT(PORTB,5);
 	 
 	 //Setup PINS for buttons
 	 CLRBIT(DDRE,5); //PE5 int5 pin3
@@ -273,12 +280,15 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 
 //Detect material from signal phase
 //Returns material ID if phase is matched. 0xFF otherwise
-char detectPhase(){
+char detectMaterial(){
 	
 	//Check if signal amplitude is above threshold
 	if(modulus>AMP_THRESHOLD){
 		//Check stability of phase
 		if(checkPhaseStability()){
+			
+			//Enable status LED
+			SETBIT(PORTB,5);
 			
 			//Detect material from phase
 			char result[2] = {0,undefined};
