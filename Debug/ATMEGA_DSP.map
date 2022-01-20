@@ -1068,11 +1068,11 @@ END GROUP
                                 0x1ea (size before relaxing)
  .debug_str     0x00000589      0x12d I2C.o
                                 0x259 (size before relaxing)
- .debug_str     0x000006b6      0x30a main.o
-                                0x510 (size before relaxing)
- .debug_str     0x000009c0      0x1ab ssd1306.o
+ .debug_str     0x000006b6      0x364 main.o
+                                0x519 (size before relaxing)
+ .debug_str     0x00000a1a      0x1ab ssd1306.o
                                 0x3af (size before relaxing)
- .debug_str     0x00000b6b       0xc0 Timer.o
+ .debug_str     0x00000bc5       0x66 Timer.o
                                 0x1fc (size before relaxing)
 
 .debug_loc      0x00000000     0x1a8b

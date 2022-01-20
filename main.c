@@ -64,7 +64,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 				computeDFT();
 				printMaterial(detectMaterial());
 				
-				//Cler status LED
+				//Clear status LED
 				CLRBIT(PORTB,5);
 				
 				//Calibration button

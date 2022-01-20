@@ -25,7 +25,6 @@
 
 #include <util/delay.h>
 #include <string.h>
-#include "USART.h"
 #include "ADC.h"
 #include "Timer.h"
 #include <math.h>
@@ -75,7 +74,6 @@ char checkPhaseStability();
 void calibratePhase(char materialID);
 void defaultDisplay();
 void calibrateDisplay();
-int intToAscii(int number);
 void debug_print_float(float input, char x, char y);
 void printMaterial(char materialID);
 void(* resetFunc) (void);

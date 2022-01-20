@@ -389,45 +389,32 @@ Disassembly of section .text:
      54c:	59 cd       	rjmp	.-1358   	; 0x0 <__vectors>
 
 0000054e <init_adc>:
-}
-*/
-
-//Init ADC 8kHz from timer 0 (with interrupt if entered)
-void init_adc(char interrupt){
-	ADCSRA |= (1<<ADPS2);						//1MHz input clock to ADC (div factor 16). NB: Only for resolutions less than 10bit
      54e:	ea e7       	ldi	r30, 0x7A	; 122
      550:	f0 e0       	ldi	r31, 0x00	; 0
      552:	90 81       	ld	r25, Z
      554:	94 60       	ori	r25, 0x04	; 4
      556:	90 83       	st	Z, r25
-//	ADMUX  |= (1<<REFS0);						//3,3 V reference with cap at VREF pin.
-	ADMUX  |= (1<<ADLAR);						//Left adjustment for 8bit resolution
      558:	ac e7       	ldi	r26, 0x7C	; 124
      55a:	b0 e0       	ldi	r27, 0x00	; 0
      55c:	9c 91       	ld	r25, X
      55e:	90 62       	ori	r25, 0x20	; 32
      560:	9c 93       	st	X, r25
-	DIDR0  |= (1<<ADC0D);						//disabling unused inputs to save power
      562:	ae e7       	ldi	r26, 0x7E	; 126
      564:	b0 e0       	ldi	r27, 0x00	; 0
      566:	9c 91       	ld	r25, X
      568:	91 60       	ori	r25, 0x01	; 1
      56a:	9c 93       	st	X, r25
-	ADCSRB |= (1<<ADTS1) | (1<<ADTS0);			//Auto Trigger source: (Timer/Counter0 Compare Match A)
      56c:	ab e7       	ldi	r26, 0x7B	; 123
      56e:	b0 e0       	ldi	r27, 0x00	; 0
      570:	9c 91       	ld	r25, X
      572:	93 60       	ori	r25, 0x03	; 3
      574:	9c 93       	st	X, r25
-	ADCSRA |= (1<<ADATE);						//Enable auto trigger mode
      576:	90 81       	ld	r25, Z
      578:	90 62       	ori	r25, 0x20	; 32
      57a:	90 83       	st	Z, r25
-	ADCSRA |= (1<<ADEN);						//Enable ADC
      57c:	90 81       	ld	r25, Z
      57e:	90 68       	ori	r25, 0x80	; 128
      580:	90 83       	st	Z, r25
-	if(interrupt) ADCSRA |= (1<<ADIE);			//Enable interrupt
      582:	88 23       	and	r24, r24
      584:	19 f0       	breq	.+6      	; 0x58c <init_adc+0x3e>
      586:	80 81       	ld	r24, Z
@@ -436,6 +423,12 @@ void init_adc(char interrupt){
      58c:	08 95       	ret
 
 0000058e <I2C_Init>:
+char I2C_Read_Nack()		/* I2C read nack function */
+{
+	TWCR=(1<<TWEN)|(1<<TWINT);	/* Enable TWI and clear interrupt flag */
+	while(!(TWCR&(1<<TWINT)));	/* Wait until TWI finish its current job */
+	return TWDR;		/* Return received data */
+}
      58e:	81 b1       	in	r24, 0x01	; 1
      590:	81 60       	ori	r24, 0x01	; 1
      592:	81 b9       	out	0x01, r24	; 1
@@ -514,8 +507,13 @@ void init_adc(char interrupt){
      636:	08 95       	ret
 
 00000638 <I2C_Stop>:
+
+void I2C_Stop()			/* I2C stop function */
+{
+	TWCR=(1<<TWSTO)|(1<<TWINT)|(1<<TWEN);/* Enable TWI, generate stop */
      638:	84 e9       	ldi	r24, 0x94	; 148
      63a:	80 93 bc 00 	sts	0x00BC, r24	; 0x8000bc <__TEXT_REGION_LENGTH__+0x7c00bc>
+	while(TWCR&(1<<TWSTO));	/* Wait until stop condition execution */
      63e:	80 91 bc 00 	lds	r24, 0x00BC	; 0x8000bc <__TEXT_REGION_LENGTH__+0x7c00bc>
      642:	84 fd       	sbrc	r24, 4
      644:	fc cf       	rjmp	.-8      	; 0x63e <I2C_Stop+0x6>
@@ -2523,6 +2521,12 @@ ISR(INT5_vect){
     12d8:	18 95       	reti
 
 000012da <ssd1306_command>:
+
+	ssd1306_command(0xb0 + y);
+	ssd1306_command(((x & 0xf0) >> 4) | 0x10); // | 0x10
+
+
+}
     12da:	cf 93       	push	r28
     12dc:	c8 2f       	mov	r28, r24
     12de:	80 91 92 03 	lds	r24, 0x0392	; 0x800392 <_i2c_address>
@@ -2693,6 +2697,7 @@ ISR(INT5_vect){
     1418:	08 95       	ret
 
 0000141a <print_fonts>:
+void print_fonts(){
     141a:	df 92       	push	r13
     141c:	ef 92       	push	r14
     141e:	ff 92       	push	r15
@@ -2700,19 +2705,37 @@ ISR(INT5_vect){
     1422:	1f 93       	push	r17
     1424:	cf 93       	push	r28
     1426:	df 93       	push	r29
+	clear_display();
     1428:	b6 df       	rcall	.-148    	; 0x1396 <clear_display>
+
+	uint8_t data=32;
+	for(int k=0;k<6;k++){
     142a:	e1 2c       	mov	r14, r1
     142c:	f1 2c       	mov	r15, r1
+
+}
+void print_fonts(){
+	clear_display();
+
+	uint8_t data=32;
     142e:	68 94       	set
     1430:	dd 24       	eor	r13, r13
     1432:	d5 f8       	bld	r13, 5
+	for(int k=0;k<6;k++){
     1434:	27 c0       	rjmp	.+78     	; 0x1484 <print_fonts+0x6a>
+		setXY(k,0);
     1436:	60 e0       	ldi	r22, 0x00	; 0
     1438:	8e 2d       	mov	r24, r14
     143a:	9a df       	rcall	.-204    	; 0x1370 <setXY>
+
+		for (int j=0;j<16;j++)
     143c:	00 e0       	ldi	r16, 0x00	; 0
     143e:	10 e0       	ldi	r17, 0x00	; 0
     1440:	19 c0       	rjmp	.+50     	; 0x1474 <print_fonts+0x5a>
+		{
+
+			for(int i=0;i<8;i++){
+			SendChar(pgm_read_byte(myFont[(data+j)-0x20]+i));
     1442:	f8 01       	movw	r30, r16
     1444:	ed 0d       	add	r30, r13
     1446:	f1 1d       	adc	r31, r1
@@ -2729,6 +2752,12 @@ ISR(INT5_vect){
     145c:	fd 1f       	adc	r31, r29
     145e:	84 91       	lpm	r24, Z
     1460:	7b df       	rcall	.-266    	; 0x1358 <SendChar>
+		setXY(k,0);
+
+		for (int j=0;j<16;j++)
+		{
+
+			for(int i=0;i<8;i++){
     1462:	21 96       	adiw	r28, 0x01	; 1
     1464:	02 c0       	rjmp	.+4      	; 0x146a <print_fonts+0x50>
     1466:	c0 e0       	ldi	r28, 0x00	; 0
@@ -2736,13 +2765,31 @@ ISR(INT5_vect){
     146a:	c8 30       	cpi	r28, 0x08	; 8
     146c:	d1 05       	cpc	r29, r1
     146e:	4c f3       	brlt	.-46     	; 0x1442 <print_fonts+0x28>
+
+	uint8_t data=32;
+	for(int k=0;k<6;k++){
+		setXY(k,0);
+
+		for (int j=0;j<16;j++)
     1470:	0f 5f       	subi	r16, 0xFF	; 255
     1472:	1f 4f       	sbci	r17, 0xFF	; 255
     1474:	00 31       	cpi	r16, 0x10	; 16
     1476:	11 05       	cpc	r17, r1
     1478:	b4 f3       	brlt	.-20     	; 0x1466 <print_fonts+0x4c>
+
+			for(int i=0;i<8;i++){
+			SendChar(pgm_read_byte(myFont[(data+j)-0x20]+i));
+			}
+		}
+		data=data+16;
     147a:	80 e1       	ldi	r24, 0x10	; 16
     147c:	d8 0e       	add	r13, r24
+}
+void print_fonts(){
+	clear_display();
+
+	uint8_t data=32;
+	for(int k=0;k<6;k++){
     147e:	8f ef       	ldi	r24, 0xFF	; 255
     1480:	e8 1a       	sub	r14, r24
     1482:	f8 0a       	sbc	r15, r24
@@ -2750,6 +2797,12 @@ ISR(INT5_vect){
     1486:	e8 16       	cp	r14, r24
     1488:	f1 04       	cpc	r15, r1
     148a:	ac f2       	brlt	.-86     	; 0x1436 <print_fonts+0x1c>
+			SendChar(pgm_read_byte(myFont[(data+j)-0x20]+i));
+			}
+		}
+		data=data+16;
+	}
+	}
     148c:	df 91       	pop	r29
     148e:	cf 91       	pop	r28
     1490:	1f 91       	pop	r17
@@ -2760,18 +2813,29 @@ ISR(INT5_vect){
     149a:	08 95       	ret
 
 0000149c <init_timer0>:
+	TIMSK1 |= (1<<OCIE1B);				//Interrupt when TCNT1 = OCR3B
+}
+	
+//Initialize hardware timer 0
+void init_timer0(){
+	DDRB |= (1<<DDB7);					// Set OC0A as output
     149c:	84 b1       	in	r24, 0x04	; 4
     149e:	80 68       	ori	r24, 0x80	; 128
     14a0:	84 b9       	out	0x04, r24	; 4
+	TCCR0A |= (1<<COM0A0) | (1<<WGM01); //Toggle OC0A CTC-mode
     14a2:	84 b5       	in	r24, 0x24	; 36
     14a4:	82 64       	ori	r24, 0x42	; 66
     14a6:	84 bd       	out	0x24, r24	; 36
+	TCCR0B |= (1<<CS01);				//Prescaler 8
     14a8:	85 b5       	in	r24, 0x25	; 37
     14aa:	82 60       	ori	r24, 0x02	; 2
     14ac:	85 bd       	out	0x25, r24	; 37
+	TCNT0 = 0;							//Count from 0
     14ae:	16 bc       	out	0x26, r1	; 38
+	OCR0A = 249;						//Compare value
     14b0:	89 ef       	ldi	r24, 0xF9	; 249
     14b2:	87 bd       	out	0x27, r24	; 39
+	TIMSK0 |= (1<<OCIE0A);				//Interrupt when TCNT1 = OCR0A
     14b4:	ee e6       	ldi	r30, 0x6E	; 110
     14b6:	f0 e0       	ldi	r31, 0x00	; 0
     14b8:	80 81       	ld	r24, Z
