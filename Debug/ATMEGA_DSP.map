@@ -73,7 +73,6 @@ Allocating common symbols
 Common symbol       size              file
 
 read_addres         0x1               I2C.o
-OLED_buffer         0x14              main.o
 BTN4_flag           0x1               main.o
 write_address       0x1               I2C.o
 BTN3_flag           0x1               main.o
@@ -110,10 +109,6 @@ Discarded input sections
  .bss.anglebuf  0x00000000       0x28 main.o
  .bss.anglecounter
                 0x00000000        0x1 main.o
- .bss.transmitflag
-                0x00000000        0x1 main.o
- .bss.printbuffer
-                0x00000000        0x4 main.o
  .bss.DFT_counter
                 0x00000000        0x2 main.o
  .text          0x00000000        0x0 ssd1306.o
@@ -877,7 +872,7 @@ END GROUP
                 0x008003dc                _edata = .
                 0x008003dc                PROVIDE (__data_end, .)
 
-.bss            0x008003dc      0x1da
+.bss            0x008003dc      0x1c6
                 0x008003dc                PROVIDE (__bss_start, .)
  *(.bss)
  *(.bss*)
@@ -926,20 +921,19 @@ END GROUP
                 0x0080059d        0x2 main.o
                 0x0080059d                resetFunc
  *(COMMON)
- COMMON         0x0080059f       0x17 main.o
-                0x0080059f                OLED_buffer
-                0x008005b3                BTN4_flag
-                0x008005b4                BTN3_flag
-                0x008005b5                BTN5_flag
-                0x008005b6                PROVIDE (__bss_end, .)
+ COMMON         0x0080059f        0x3 main.o
+                0x0080059f                BTN4_flag
+                0x008005a0                BTN3_flag
+                0x008005a1                BTN5_flag
+                0x008005a2                PROVIDE (__bss_end, .)
                 0x00001f42                __data_load_start = LOADADDR (.data)
                 0x0000211e                __data_load_end = (__data_load_start + SIZEOF (.data))
 
-.noinit         0x008005b6        0x0
+.noinit         0x008005a2        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
  *(.noinit*)
                 [!provide]                PROVIDE (__noinit_end, .)
-                0x008005b6                _end = .
+                0x008005a2                _end = .
                 [!provide]                PROVIDE (__heap_start, .)
 
 .eeprom         0x00810000        0x0
@@ -1026,14 +1020,14 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x2e8e
+.debug_info     0x00000000     0x2e38
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0xbbc C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega2560/avr6/crtatmega2560.o
  .debug_info    0x00000bbc      0x163 ADC.o
  .debug_info    0x00000d1f      0x230 I2C.o
- .debug_info    0x00000f4f      0xd3e main.o
- .debug_info    0x00001c8d     0x10ef ssd1306.o
- .debug_info    0x00002d7c      0x112 Timer.o
+ .debug_info    0x00000f4f      0xce8 main.o
+ .debug_info    0x00001c37     0x10ef ssd1306.o
+ .debug_info    0x00002d26      0x112 Timer.o
 
 .debug_abbrev   0x00000000     0x128b
  *(.debug_abbrev)
@@ -1061,18 +1055,18 @@ END GROUP
  .debug_frame   0x000003dc      0x2f0 ssd1306.o
  .debug_frame   0x000006cc       0x84 Timer.o
 
-.debug_str      0x00000000      0xc2b
+.debug_str      0x00000000      0xc0d
  *(.debug_str)
  .debug_str     0x00000000      0x3e6 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.6.364/gcc/dev/atmega2560/avr6/crtatmega2560.o
- .debug_str     0x000003e6      0x1a3 ADC.o
+ .debug_str     0x000003e6      0x1aa ADC.o
                                 0x1ea (size before relaxing)
- .debug_str     0x00000589      0x12d I2C.o
+ .debug_str     0x00000590      0x12d I2C.o
                                 0x259 (size before relaxing)
- .debug_str     0x000006b6      0x364 main.o
-                                0x519 (size before relaxing)
- .debug_str     0x00000a1a      0x1ab ssd1306.o
+ .debug_str     0x000006bd      0x33f main.o
+                                0x4f4 (size before relaxing)
+ .debug_str     0x000009fc      0x1ab ssd1306.o
                                 0x3af (size before relaxing)
- .debug_str     0x00000bc5       0x66 Timer.o
+ .debug_str     0x00000ba7       0x66 Timer.o
                                 0x1fc (size before relaxing)
 
 .debug_loc      0x00000000     0x1a8b

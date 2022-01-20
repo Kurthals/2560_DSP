@@ -7,7 +7,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   1 .text         00001f42  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          000001da  008003dc  008003dc  000021b2  2**0
+  2 .bss          000001c6  008003dc  008003dc  000021b2  2**0
                   ALLOC
   3 .comment      00000030  00000000  00000000  000021b2  2**0
                   CONTENTS, READONLY
@@ -15,19 +15,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   5 .debug_aranges 00000268  00000000  00000000  00002224  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00002e8e  00000000  00000000  0000248c  2**0
+  6 .debug_info   00002e38  00000000  00000000  0000248c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000128b  00000000  00000000  0000531a  2**0
+  7 .debug_abbrev 0000128b  00000000  00000000  000052c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00001877  00000000  00000000  000065a5  2**0
+  8 .debug_line   00001877  00000000  00000000  0000654f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000750  00000000  00000000  00007e1c  2**2
+  9 .debug_frame  00000750  00000000  00000000  00007dc8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000c2b  00000000  00000000  0000856c  2**0
+ 10 .debug_str    00000c0d  00000000  00000000  00008518  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00001a8b  00000000  00000000  00009197  2**0
+ 11 .debug_loc    00001a8b  00000000  00000000  00009125  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000002d8  00000000  00000000  0000ac22  2**0
+ 12 .debug_ranges 000002d8  00000000  00000000  0000abb0  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -379,7 +379,7 @@ Disassembly of section .text:
      53e:	1d 92       	st	X+, r1
 
 00000540 <.do_clear_bss_start>:
-     540:	a6 3b       	cpi	r26, 0xB6	; 182
+     540:	a2 3a       	cpi	r26, 0xA2	; 162
      542:	b2 07       	cpc	r27, r18
      544:	e1 f7       	brne	.-8      	; 0x53e <.do_clear_bss_loop>
      546:	45 d5       	rcall	.+2698   	; 0xfd2 <main>
@@ -1162,7 +1162,7 @@ void defaultDisplay(){
      9d0:	8d b1       	in	r24, 0x0d	; 13
      9d2:	8f 7d       	andi	r24, 0xDF	; 223
      9d4:	8d b9       	out	0x0d, r24	; 13
-	 CLRBIT(DDRD,2); //PE4 int2 pin2 (SET)
+	 CLRBIT(DDRD,2); //PD2 int2 pin19 (SET)
      9d6:	8a b1       	in	r24, 0x0a	; 10
      9d8:	8b 7f       	andi	r24, 0xFB	; 251
      9da:	8a b9       	out	0x0a, r24	; 10
@@ -2060,11 +2060,11 @@ void calibratePhase(char materialID){
     100c:	1c dd       	rcall	.-1480   	; 0xa46 <printMaterial>
     100e:	85 b1       	in	r24, 0x05	; 5
 				
-				//Cler status LED
+				//Clear status LED
 				CLRBIT(PORTB,5);
     1010:	8f 7d       	andi	r24, 0xDF	; 223
     1012:	85 b9       	out	0x05, r24	; 5
-    1014:	80 91 b4 05 	lds	r24, 0x05B4	; 0x8005b4 <BTN3_flag>
+    1014:	80 91 a0 05 	lds	r24, 0x05A0	; 0x8005a0 <BTN3_flag>
 				
 				//Calibration button
 				if(BTN3_flag == 1){
@@ -2093,14 +2093,14 @@ void calibratePhase(char materialID){
 						nextState(select);
     1032:	83 e0       	ldi	r24, 0x03	; 3
     1034:	09 db       	rcall	.-2542   	; 0x648 <nextState>
-    1036:	10 92 b4 05 	sts	0x05B4, r1	; 0x8005b4 <BTN3_flag>
+    1036:	10 92 a0 05 	sts	0x05A0, r1	; 0x8005a0 <BTN3_flag>
 					}
  					BTN3_flag = 0;
     103a:	8d b3       	in	r24, 0x1d	; 29
 					SETBIT(EIMSK,INT3);
     103c:	88 60       	ori	r24, 0x08	; 8
     103e:	8d bb       	out	0x1d, r24	; 29
-    1040:	80 91 b5 05 	lds	r24, 0x05B5	; 0x8005b5 <BTN5_flag>
+    1040:	80 91 a1 05 	lds	r24, 0x05A1	; 0x8005a1 <BTN5_flag>
 				}
 
 				if(BTN5_flag == 1){
@@ -2123,7 +2123,7 @@ void calibratePhase(char materialID){
 						nextState(reset);
     105e:	80 e0       	ldi	r24, 0x00	; 0
     1060:	f3 da       	rcall	.-2586   	; 0x648 <nextState>
-    1062:	10 92 b5 05 	sts	0x05B5, r1	; 0x8005b5 <BTN5_flag>
+    1062:	10 92 a1 05 	sts	0x05A1, r1	; 0x8005a1 <BTN5_flag>
 					}
 					BTN5_flag =0;
 					SETBIT(EIMSK,INT5);
@@ -2154,7 +2154,7 @@ void calibratePhase(char materialID){
     1080:	e3 da       	rcall	.-2618   	; 0x648 <nextState>
     1082:	a8 cf       	rjmp	.-176    	; 0xfd4 <main+0x2>
 				break;
-    1084:	80 91 b3 05 	lds	r24, 0x05B3	; 0x8005b3 <BTN4_flag>
+    1084:	80 91 9f 05 	lds	r24, 0x059F	; 0x80059f <BTN4_flag>
 			
 			case store:
 				//Select material
@@ -2186,14 +2186,14 @@ void calibratePhase(char materialID){
 						printMaterial(materialSelctor);
     10b4:	80 91 90 03 	lds	r24, 0x0390	; 0x800390 <materialSelctor>
     10b8:	c6 dc       	rcall	.-1652   	; 0xa46 <printMaterial>
-    10ba:	10 92 b3 05 	sts	0x05B3, r1	; 0x8005b3 <BTN4_flag>
+    10ba:	10 92 9f 05 	sts	0x059F, r1	; 0x80059f <BTN4_flag>
 					}
 					BTN4_flag = 0;
     10be:	8d b3       	in	r24, 0x1d	; 29
 					SETBIT(EIMSK,INT2);
     10c0:	84 60       	ori	r24, 0x04	; 4
     10c2:	8d bb       	out	0x1d, r24	; 29
-    10c4:	80 91 b4 05 	lds	r24, 0x05B4	; 0x8005b4 <BTN3_flag>
+    10c4:	80 91 a0 05 	lds	r24, 0x05A0	; 0x8005a0 <BTN3_flag>
 				}
 				
 				//Perform calibration when desired material has been selected
@@ -2218,7 +2218,7 @@ void calibratePhase(char materialID){
 						nextState(calibrate);
     10e4:	82 e0       	ldi	r24, 0x02	; 2
     10e6:	b0 da       	rcall	.-2720   	; 0x648 <nextState>
-    10e8:	10 92 b4 05 	sts	0x05B4, r1	; 0x8005b4 <BTN3_flag>
+    10e8:	10 92 a0 05 	sts	0x05A0, r1	; 0x8005a0 <BTN3_flag>
 					}
 					BTN3_flag = 0;
     10ec:	8d b3       	in	r24, 0x1d	; 29
@@ -2451,7 +2451,7 @@ ISR(INT3_vect){
 	else{
 	BTN3_flag = 1;
     1270:	81 e0       	ldi	r24, 0x01	; 1
-    1272:	80 93 b4 05 	sts	0x05B4, r24	; 0x8005b4 <BTN3_flag>
+    1272:	80 93 a0 05 	sts	0x05A0, r24	; 0x8005a0 <BTN3_flag>
 	}
 }
     1276:	8f 91       	pop	r24
@@ -2481,7 +2481,7 @@ ISR(INT2_vect){
 	else{
 		BTN4_flag = 1;
     129c:	81 e0       	ldi	r24, 0x01	; 1
-    129e:	80 93 b3 05 	sts	0x05B3, r24	; 0x8005b3 <BTN4_flag>
+    129e:	80 93 9f 05 	sts	0x059F, r24	; 0x80059f <BTN4_flag>
 	}
 }
     12a2:	8f 91       	pop	r24
@@ -2511,7 +2511,7 @@ ISR(INT5_vect){
 	else{
 		BTN5_flag = 1;
     12c8:	81 e0       	ldi	r24, 0x01	; 1
-    12ca:	80 93 b5 05 	sts	0x05B5, r24	; 0x8005b5 <BTN5_flag>
+    12ca:	80 93 a1 05 	sts	0x05A1, r24	; 0x8005a1 <BTN5_flag>
 	}
     12ce:	8f 91       	pop	r24
     12d0:	0f 90       	pop	r0

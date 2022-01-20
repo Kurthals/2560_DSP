@@ -1,6 +1,6 @@
 /* Digital_Design.c
  *
- * Created: 04-06-2021 13:21:47
+ * Created: 20-01-2022 
  * Author : Jan & Lars
  */ 
 
@@ -8,7 +8,6 @@
 #include "main.h"
 unsigned char timercount = 0;
 unsigned char ADC_start_flag = 0;
-char OLED_buffer[20];
 int buffercounter = 0;
 volatile char active_write = 0;
 
@@ -18,7 +17,7 @@ float Re = 0;
 float Im = 0;
 
 char trig_count = 0;
-volatile char DFT_ready = 0; //Måske nødvendigt med Volatile
+volatile char DFT_ready = 0;
 enum tilstande {reset, run, calibrate, select, store};
 char tilstand = run;
 
@@ -29,10 +28,8 @@ double angleThres[10] = {0};
 char angleCnt = 0;
 
 int DFT_counter = 0;
-char printbuffer[4]={0};
-char DFTBuffer[2][64] = {{0},{0}}; //{0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128,0,128,255,128};
+char DFTBuffer[2][NUM_SAMPLES] = {{0},{0}};
 volatile char init_flag = 0;
-char transmitflag = 0;
 volatile char BTN5_flag, BTN4_flag, BTN3_flag;
 char anglecounter = 0;
 double anglebuf[AVERAGE_NUM]= {0};
@@ -153,7 +150,7 @@ float materials[NUM_MATERIALS][NUM_MATERIAL_SAMPLES] = {
 	 
 	 //Setup PINS for buttons
 	 CLRBIT(DDRE,5); //PE5 int5 pin3 (RESET)
-	 CLRBIT(DDRD,2); //PE4 int2 pin2 (SET)
+	 CLRBIT(DDRD,2); //PD2 int2 pin19 (SET)
 	 CLRBIT(DDRD,3); //PD3 int3 pin18 (CALIBRATE)
 	 //Internal Pull-up on inputs
 	 SETBIT(PORTE,5); 
@@ -438,13 +435,6 @@ void debug_print_float(float input,char x, char y){
 	//sprintf(temp,"%d",input);
 	sendStrXY(temp, x,y);
 }
-
-
-
-
-
-
-
 
 
 // ================================================
